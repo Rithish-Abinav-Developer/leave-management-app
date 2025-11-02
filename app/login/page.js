@@ -141,7 +141,7 @@ const [loading, setLoading] = useState(false);
       <div className="entry_page_footer">
         <ul>
           <li>Version 1.0.0</li>
-          <li>Powered by Srdn.Co</li>
+          <li>Developed by Rithish</li>
           <li>Help & Support</li>
         </ul>
       </div>

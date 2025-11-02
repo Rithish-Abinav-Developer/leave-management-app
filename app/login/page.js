@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 export default function Page() {
 const router = useRouter();
 
+const [loading, setLoading] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
   const [err, setErr] = useState("");
@@ -40,7 +41,9 @@ const router = useRouter();
         id: data.user?.id,
         profileImage: data.user?.profileImage,
       };
+      
       localStorage.setItem("user", JSON.stringify(userData));
+      setLoading(false);
       router.push("/home");
     },
     onError: (error) => {
@@ -51,6 +54,7 @@ const router = useRouter();
 
   const Login = (e) => {
     e.preventDefault();
+    setLoading(true);
     if (!user.email || !user.password) {
       setErr("Please fill in all fields");
       return;

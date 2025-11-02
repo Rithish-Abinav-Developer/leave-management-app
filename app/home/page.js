@@ -37,6 +37,7 @@ export default function Page() {
 
 const handleFileChange = async (e) => {
   const file = e.target.files[0];
+  // console.log(file)
   if (!file) return;
 
   try {
@@ -54,7 +55,6 @@ const handleFileChange = async (e) => {
       },
     });
 
-    // console.log("✅ Uploaded successfully:", res.data);
     localStorage.setItem("user", JSON.stringify({ ...user, profileImage: res.data.url }));
     setProfileImage(res.data.url);
     setLoading(false);

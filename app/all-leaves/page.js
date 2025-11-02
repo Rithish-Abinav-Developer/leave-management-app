@@ -38,7 +38,8 @@ const exportData = allApplications.map((a) => ({
       : new Date(a.date).toLocaleDateString(),
   Reason: a.reason || "-",
   Status: a.status,
-  ...(a.leaveType === "Sick Leave" && { File: a.fileUrl || "-" }) 
+  ...(a.leaveType === "Sick Leave" && { File: a.fileUrl || "-" }) ,
+ ...(a.type === "Permission" && { Hours: `${a.hours} hrs` }) ,
 }));
 
 
@@ -92,23 +93,21 @@ const exportData = allApplications.map((a) => ({
           : "pending"
       }`}>
                   <div className="detail">
-                    <p id="leave_type">
+                     <p id="leave_type">
                       {application.name} -{" "}
                       {application.type === "Leave"
                         ? application.leaveType
-                        : "Permission"}
+                        : `Permission for ${application.hours==="0.5"?"half an":application.hours} hr`}
+
                     </p>
                     <p id="date">
-                      {application.type === "Leave"
-                        ? `${new Date(
-                            application.date
-                          ).toLocaleDateString("en-GB")} to ${new Date(
-                            application.toDate
-                          ).toLocaleDateString("en-GB")}`
-                        : new Date(application.date).toLocaleDateString(
-                            "en-GB"
-                          )}
-                    </p>
+  {application.type === "Leave"
+    ? `${new Date(application.date).toLocaleDateString("en-GB")} to ${new Date(
+        application.toDate
+      ).toLocaleDateString("en-GB")}`
+    : `${new Date(application.date).toLocaleDateString("en-GB")} - ${application.time}`}
+</p>
+
                     <p id="reason">{application.reason}</p>
                     {application.fileUrl && (
                       <a

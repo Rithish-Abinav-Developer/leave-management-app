@@ -76,17 +76,17 @@ export default function AdminApplicationsPage() {
                       {application.name} -{" "}
                       {application.type === "Leave"
                         ? application.leaveType
-                        : "Permission"}
+                        : `Permission for ${application.hours==="0.5"?"half an":application.hours} hr`}
+
                     </p>
-                    <p id="date">
-                      {application.type === "Leave"
-                        ? `${new Date(
-                            application.date
-                          ).toLocaleDateString("en-GB")} to ${new Date(
-                            application.toDate
-                          ).toLocaleDateString("en-GB")}`
-                        : new Date(application.date).toLocaleDateString("en-GB")}
-                    </p>
+            <p id="date">
+  {application.type === "Leave"
+    ? `${new Date(application.date).toLocaleDateString("en-GB")} to ${new Date(
+        application.toDate
+      ).toLocaleDateString("en-GB")}`
+    : `${new Date(application.date).toLocaleDateString("en-GB")} - ${application.time}`}
+</p>
+
                     {application.fileUrl && (
                       <a
                         id="medical_certificate"

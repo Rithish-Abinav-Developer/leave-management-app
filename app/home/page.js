@@ -20,6 +20,7 @@ import leaveMaternity from "@/app/src/mi.svg";
 import PartyImage from '@/app/src/party-gif.webp'
 import Loader from "../components/Loader";
 import EditProfile from "@/app/src/edit.svg";
+import TimeIcon from "@/app/src/time-icon.svg";
 
 
 export default function Page() {
@@ -283,14 +284,16 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
             ? leaveSick
             : item.leaveType === "Marriage Leave"
             ? leaveMarriage
-            : leaveMaternity
+            : item.leaveType === "Maternity Leave"
+            ? leaveMaternity
+            : TimeIcon
         }
         alt="casual-leave-icon"
         width={16}
         height={16}
       />
       <div>
-        <h5>{item.type==="Leave"?item.leaveType:"permission"}</h5>
+        <h5>{item.type==="Leave"?item.leaveType:`Permission for ${item.hours==="0.5"?"half an":item.hours} hr`}</h5>
         {item.toDate ? (
           <p className="date">
             {`${new Date(item.date).toLocaleDateString("en-GB")}`} to{" "}
@@ -298,7 +301,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
           </p>
         ) : (
           <p className="date">
-            {`${new Date(item.date).toLocaleDateString("en-GB")}`}
+            {`${new Date(item.date).toLocaleDateString("en-GB")} - ${item.time}`}
           </p>
         )}
         <p className="reason">{item.reason}</p>

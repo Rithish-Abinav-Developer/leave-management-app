@@ -134,7 +134,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
    <label htmlFor="profileImage" id="edit_profile">
         <Image src={EditProfile} alt="edit-profile" width={24} height={24} loading="eager" id=""  onClick={handleImageClick}/>
         </label>
-         <input type="file" name="profileImage" accept="image/*" id="profileImage"  onChange={handleFileChange} style={{display:"none"}} />
+         <input type="file" name="profileImage" id="profileImage"  onChange={handleFileChange} style={{display:"none"}} />
    
      
         <Image src={profilePic || profile} alt="profile" width={75} height={75} loading="eager" />

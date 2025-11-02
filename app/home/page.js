@@ -131,23 +131,31 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
       <div className="home_banner entry_page_banner">
         <div className="profile_img">
           
-     <div id="edit_profile">
-  <label htmlFor="profileUpload" className="edit-btn">
+    <div className="edit-profile-container">
+  <button
+    type="button"
+    className="edit-btn"
+    onClick={() => fileInputRef.current?.click()}
+  >
     <Image
       src={EditProfile}
-      alt="edit-profile"
-      width={24}
-      height={24}
-      loading="eager"
+      alt="edit profile"
+      width={16}
+      height={16}
+      priority
+      style={{ pointerEvents: "none" }}
     />
-  </label>
+  </button>
+
   <input
-    id="profileUpload"
     type="file"
     accept="image/*"
+    ref={fileInputRef}
     onChange={handleFileChange}
+    style={{ display: "none" }}
   />
 </div>
+
 
      
         <Image src={profilePic || profile} alt="profile" width={75} height={75} loading="eager" />

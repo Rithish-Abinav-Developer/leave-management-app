@@ -49,6 +49,7 @@ const [loading, setLoading] = useState(false);
     },
     onError: (error) => {
       console.error("Login error:", error);
+      setLoading(false);
       setErr(error.response?.data?.error || "Something went wrong");
     },
   });

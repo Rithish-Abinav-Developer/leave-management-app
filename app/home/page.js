@@ -133,7 +133,10 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
           
    
         <Image src={EditProfile} alt="edit-profile" width={24} height={24} loading="eager" id="edit_profile"  onClick={handleImageClick}/>
-         <input type="file" name="profileImage" capture="environment"  accept="image/*"  ref={fileInputRef} onChange={handleFileChange} style={{display:"none"}} />
+         <input type="file" name="profileImage" accept="image/*"   ref={fileInputRef} onChange={handleFileChange} style={{display:"none"}} onClick={(e) => {
+    // ⚙️ Android fix: force re-click to re-open file picker
+    e.target.value = null;
+  }} />
    
      
         <Image src={profilePic || profile} alt="profile" width={75} height={75} loading="eager" />

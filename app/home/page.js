@@ -132,32 +132,30 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
         <div className="profile_img">
           
    
-       <div id="edit_profile" style={{ position: "relative", width: "28px", height: "28px" }}>
-  <Image
-    src={EditProfile}
-    alt="edit-profile"
-    width={24}
-    height={24}
-    loading="eager"
-    style={{ cursor: "pointer" }}
-  />
+       <div id="edit_profile">
+  <label htmlFor="profileImage" style={{ cursor: "pointer" }}>
+    <Image
+      src={EditProfile}
+      alt="edit-profile"
+      width={24}
+      height={24}
+      loading="eager"
+    />
+  </label>
 
-  {/* ✅ Works on Android + iOS + Desktop */}
   <input
+    id="profileImage"
     type="file"
     name="profileImage"
     accept="image/*"
-    capture=""
     onChange={handleFileChange}
-    onClick={(e) => (e.target.value = null)}
     style={{
       position: "absolute",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
       opacity: 0,
-      cursor: "pointer",
+      width: "1px",
+      height: "1px",
+      overflow: "hidden",
+      zIndex: -1,
     }}
   />
 </div>

@@ -587,6 +587,12 @@ color: var(--blue);
   cursor: pointer;
 }
 
+input[type="file"]{
+  background-color: red;
+  padding: 20px;
+  z-index: 999999999;
+}
+
 /* .home_banner .profile_img #edit_profile input {
   display: none;
 } */

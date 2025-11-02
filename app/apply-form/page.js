@@ -7,6 +7,11 @@ import { useQuery } from "@tanstack/react-query";
 import Loader from "../components/Loader";
 
 export default function Page() {
+
+  const [loading, setLoading] = useState(false);
+  
+
+
   const [formData, setFormData] = useState({
     userId: "",
     name: "",
@@ -73,6 +78,7 @@ const handleChange = (e) => {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
+  setLoading(true);
 
   const data = new FormData();
 
@@ -97,9 +103,11 @@ const handleSubmit = async (e) => {
 
     alert("Form submitted successfully!");
     setFormData(prev => ({ ...Object.fromEntries(Object.keys(prev).map(k => [k, ""])), type: "Leave", file: null }));
+    setLoading(false);
   } catch (error) {
     console.error("Error submitting:", error);
     alert("Submission failed!");
+    setLoading(false);
   }
 };
 
@@ -109,7 +117,7 @@ const handleSubmit = async (e) => {
 
   return (
     <div className="apply_page">
-      {isLoading && <Loader />}
+      {isLoading || loading && <Loader />}
       <Header pageTitle={'Apply Form'} />
 
       <div className="container">

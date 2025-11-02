@@ -9,6 +9,7 @@ import passwordEyeicon from "@/app/src/password-eye.svg";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import Loader from "../components/Loader";
 
 export default function Page() {
 const router = useRouter();
@@ -71,6 +72,8 @@ const [loading, setLoading] = useState(false);
 
   return (
     <div className="entry_page">
+      {loading && <Loader/>}
+      
       <div className="entry_page_banner">
         <div className="logo_container">
           <Image className="logo" src={logo} alt="logo" width={120} height={54} />

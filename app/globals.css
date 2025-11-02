@@ -3,6 +3,7 @@
   padding: 0;
   box-sizing: border-box;
   touch-action: manipulation !important;
+  -webkit-text-size-adjust: 100%; /* Prevents font zoom scaling */
 
 }
 

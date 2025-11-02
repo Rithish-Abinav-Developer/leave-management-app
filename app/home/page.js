@@ -162,9 +162,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
         <p>Welcome Back</p>
         <h1>{user?.name || "loading"}</h1>
           <input
-    type="file"
-    accept="image/*"
-    ref={fileInputRef}
+    type="file" name="file"
     onChange={handleFileChange}
   />
       </div>

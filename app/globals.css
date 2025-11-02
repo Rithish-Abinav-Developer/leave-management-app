@@ -175,6 +175,8 @@ header nav{
 header nav .logo{
   filter: invert(1) brightness(100);
   width: 25%;
+  display: flex;
+  align-items: center;
 }
 
 header nav h1{

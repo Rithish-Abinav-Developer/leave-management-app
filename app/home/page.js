@@ -41,11 +41,11 @@ const handleFileChange = async (e) => {
   try {
     setLoading(true);
     const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.id; 
+    const userName = user?.name; 
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("userId", userId); 
+    formData.append("name", userName); 
 
     const res = await axios.post("/api/upload/profile-image", formData, {
       headers: {

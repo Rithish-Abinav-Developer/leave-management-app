@@ -2,6 +2,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
 import connectMongo from "@/utils/connectMongo"; 
 import User from "@/models/Users";
+import Application from "@/models/Application";
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -17,14 +18,14 @@ export async function POST(request) {
 
     const formData = await request.formData();
     const file = formData.get("file");
-    const userId = formData.get("userId");
+    const userName = formData.get("name");
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    if (!userId) {
-      return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
+    if (!userName) {
+      return NextResponse.json({ error: "Missing user name" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -41,11 +42,19 @@ export async function POST(request) {
 
     const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { profileImage: fileUrl },
-      { new: true }
+    const updatedUser = await User.findOneAndUpdate(
+       { name: userName },             
+  { $set: { profileImage: fileUrl } }, 
+  { new: true }
     );
+
+    const updatedApplication = await Application.updateMany(
+  { name: userName },             
+  { $set: { profileImage: fileUrl } }, 
+  { new: true }
+);
+
+
 
     if (!updatedUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -56,6 +65,9 @@ export async function POST(request) {
       url: fileUrl,
       user: updatedUser,
     });
+
+
+
   } catch (error) {
     console.error("Error uploading:", error);
     return NextResponse.json(

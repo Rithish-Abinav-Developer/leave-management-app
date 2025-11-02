@@ -152,7 +152,6 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
     accept="image/*"
     ref={fileInputRef}
     onChange={handleFileChange}
-    style={{ display: "none" }}
   />
 </div>
 

@@ -578,7 +578,6 @@ color: var(--blue);
   overflow: hidden;
 }
 
-/* Make the label act as clickable button */
 .home_banner .profile_img #edit_profile .edit-btn {
   display: flex;
   align-items: center;
@@ -588,10 +587,9 @@ color: var(--blue);
   cursor: pointer;
 }
 
-/* Hide file input safely (works on all devices) */
-.home_banner .profile_img #edit_profile input {
+/* .home_banner .profile_img #edit_profile input {
   display: none;
-}
+} */
 
 
 .top_sec{

@@ -131,40 +131,15 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
       <div className="home_banner entry_page_banner">
         <div className="profile_img">
           
-    <div className="edit-profile-container">
-  <button
-    type="button"
-    className="edit-btn"
-    onClick={() => fileInputRef.current?.click()}
-  >
-    <Image
-      src={EditProfile}
-      alt="edit profile"
-      width={16}
-      height={16}
-      priority
-      style={{ pointerEvents: "none" }}
-    />
-  </button>
-
-  <input
-    type="file"
-    accept="image/*"
-    ref={fileInputRef}
-    onChange={handleFileChange}
-  />
-</div>
-
-
+   
+        <Image src={EditProfile} alt="edit-profile" width={24} height={24} loading="eager" id="edit_profile"  onClick={handleImageClick}/>
+         <input type="file" name="profileImage" accept="image/*" ref={fileInputRef} onChange={handleFileChange} style={{display:"none"}} />
+   
      
         <Image src={profilePic || profile} alt="profile" width={75} height={75} loading="eager" />
         </div>
         <p>Welcome Back</p>
         <h1>{user?.name || "loading"}</h1>
-          <input
-    type="file" name="file"
-    onChange={handleFileChange}
-  />
       </div>
 
       <div className="container">

@@ -558,45 +558,20 @@ color: var(--blue);
   object-fit: cover;
 }
 
-.home_banner .profile_img {
+.home_banner .profile_img{
   position: relative;
 }
 
-.home_banner .profile_img #edit_profile {
+.home_banner .profile_img #edit_profile{
   position: absolute;
   top: 0;
   right: 0;
   background-color: var(--blue);
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border: solid white 1px;
   padding: 4px;
-  border-radius: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
 }
-
-.home_banner .profile_img #edit_profile .edit-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-input[type="file"]{
-  background-color: red;
-  padding: 20px;
-  z-index: 999999999;
-}
-
-/* .home_banner .profile_img #edit_profile input {
-  display: none;
-} */
-
 
 .top_sec{
   display: flex;
@@ -861,14 +836,7 @@ animation: spin 1s linear infinite;
 }
 
 
-@supports (-webkit-touch-callout: none) {
-  input,
-  textarea,
-  select {
-    font-size: 16px !important;
-    -webkit-text-size-adjust: 100%;
-  }
-}
+
 
 @media screen and (min-width:767px) {
   body{

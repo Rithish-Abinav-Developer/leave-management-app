@@ -131,12 +131,37 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
       <div className="home_banner entry_page_banner">
         <div className="profile_img">
           
-   
-        <Image src={EditProfile} alt="edit-profile" width={24} height={24} loading="eager" id="edit_profile"  onClick={handleImageClick}/>
-         <input type="file" name="profileImage" accept="image/*"   ref={fileInputRef} onChange={handleFileChange} style={{display:"none"}} onClick={(e) => {
-    // ⚙️ Android fix: force re-click to re-open file picker
-    e.target.value = null;
-  }} />
+   <div id="edit_profile" style={{ position: "relative", width: "28px", height: "28px" }}>
+  <Image
+    src={EditProfile}
+    alt="edit-profile"
+    width={24}
+    height={24}
+    loading="eager"
+    style={{ cursor: "pointer" }}
+  />
+
+  <input
+    type="file"
+    name="profileImage"
+    accept="image/*"
+    ref={fileInputRef}
+    onChange={handleFileChange}
+    onClick={(e) => {
+      e.target.value = null; // Android fix
+    }}
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      opacity: 0,
+      cursor: "pointer",
+    }}
+  />
+</div>
+
    
      
         <Image src={profilePic || profile} alt="profile" width={75} height={75} loading="eager" />

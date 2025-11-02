@@ -13,7 +13,7 @@ export async function GET(req, { params }) {
 
 
     const utcToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
-    console.log("UTC Today:", utcToday);
+    // console.log("UTC Today:", utcToday);
 
     const applications = await Application.aggregate([
       {

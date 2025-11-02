@@ -62,7 +62,7 @@ export default function AdminApplicationsPage() {
   return (
     <div className="apply_page apply_status_page">
       {isLoading || isLoadingNotifications && <Loader />}
-      <Header pageTitle="Admin Applications" />
+      <Header pageTitle="Status" />
       <div className="container">
         {/* Pending Applications */}
         <section className="applications">

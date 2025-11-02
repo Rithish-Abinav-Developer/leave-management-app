@@ -27,7 +27,7 @@ const [loading, setLoading] = useState(false);
   const loginMutation = useMutation({
     mutationFn: async (user) => {
       const res = await axios.post("/api/login", user);
-      console.log("Login response:", res.data);
+      // console.log("Login response:", res.data);
       return res.data;
     },
     onSuccess: (data) => {

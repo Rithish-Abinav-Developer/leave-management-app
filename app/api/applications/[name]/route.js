@@ -5,7 +5,7 @@ import Application from "@/models/Application";
 export async function GET(req, { params }) {
   try {
     const { name } = await params;              
-    console.log("Requested name:", name);
+    // console.log("Requested name:", name);
 
     await connectMongo();
 

@@ -4,6 +4,9 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import homeIcon from "@/app/src/home.svg";
 import { useRouter } from "next/navigation";
+import LeaveIcon from "@/app/src/all-leave-icon.svg";
+import StatusIcon from "@/app/src/status-icon.svg";
+
 
 export default function Footer() {
   const [user, setUser] = useState(null);
@@ -44,9 +47,15 @@ export default function Footer() {
         </li>
 
         <li>
-          <Link href="/apply-form">
-            <Image src={homeIcon} alt="Apply" width={24} height={24} />
-            <p>Apply Leave</p>
+          <Link
+            href={
+              user?.role === "employee"
+                ? "/apply-form"
+                : "/all-leaves"
+            }
+          >
+            <Image src={LeaveIcon} alt="Status" width={24} height={24} />
+            <p>{user?.role === "employee" ? "Apply Leave" : "All Leaves"}</p>
           </Link>
         </li>
 
@@ -58,7 +67,7 @@ export default function Footer() {
                 : "/apply-status/admin"
             }
           >
-            <Image src={homeIcon} alt="Status" width={24} height={24} />
+            <Image src={StatusIcon} alt="Status" width={24} height={24} />
             <p>Leave Status</p>
           </Link>
         </li>

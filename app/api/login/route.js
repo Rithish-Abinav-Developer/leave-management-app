@@ -12,7 +12,7 @@ export async function POST(req) {
   await connectMongo();
 
   const { email, password } = await req.json();
-  console.log(email, password);
+  // console.log(email, password);
 
   if (!email || !password) {
     return NextResponse.json({ error: "Email and password are required" }, { status: 400 });

@@ -53,7 +53,7 @@ const handleFileChange = async (e) => {
       },
     });
 
-    console.log("✅ Uploaded successfully:", res.data);
+    // console.log("✅ Uploaded successfully:", res.data);
     localStorage.setItem("user", JSON.stringify({ ...user, profileImage: res.data.url }));
     setProfileImage(res.data.url);
     setLoading(false);
@@ -68,7 +68,7 @@ const handleFileChange = async (e) => {
  useEffect(()=>{
   const user = JSON.parse(localStorage.getItem("user"));
   if(user?.profileImage){
-    console.log(user?.profileImage)
+    // console.log(user?.profileImage)
     setProfileImage(user.profileImage);
   }
 },[])
@@ -140,6 +140,9 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
       </div>
 
       <div className="container">
+
+{user?.role==="employee" && (
+<>
         <div className="top_sec">
             <h3>Dashboard</h3>
             <Link href="/apply-status/employee">
@@ -193,11 +196,13 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
 
 
 </div>
+</>
+)}
 
 
  <div className="top_sec">
             <h3>Colleague’s on leave today</h3>
-            {TodayLeave && TodayLeave.length > 0 && (
+            {TodayLeave && TodayLeave.length > 2 && (
             <button onClick={() => setShowFullList(prev => !prev)}>
            {showFullList ? "Show Less" : "Full List"}
             <Image src={rightArrow} alt="right-arrow" width={16} height={16} />

@@ -7,14 +7,14 @@ export async function POST(req) {
     await connectMongo();
 
     const adminNotification = await req.json();
-    console.log("Admin notification:", adminNotification);
+    // console.log("Admin notification:", adminNotification);
 
     const result = await Users.updateMany(
       { role: "admin" },
       { $inc: { hasSeen: 1 } }
     );
 
-    console.log("Admins updated:", result);
+    // console.log("Admins updated:", result);
 
     return NextResponse.json({
       success: true,

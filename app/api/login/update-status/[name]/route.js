@@ -9,7 +9,7 @@ export async function PUT(req, { params }) {
     const { hasSeen, increment } = body;
 
     await connectMongo();
-    console.log(name, hasSeen, increment);
+    // console.log(name, hasSeen, increment);
 
     let update = {};
 

@@ -13,9 +13,6 @@ html, body {
   overscroll-behavior: none;
 }
 
-
-
-
 :root {
   --blue: #034EA1;
   --lightBlue :#BECDDD;
@@ -51,6 +48,7 @@ body{
     justify-content: center;
     align-items: flex-end;
     width: 100%;
+
 }
 
 .logo_container{
@@ -834,5 +832,11 @@ animation: spin 1s linear infinite;
 @keyframes spin {
   to{
     transform: rotate(360deg);
+  }
+}
+
+@media screen and (min-width:767px) {
+  body{
+    display: none;
   }
 }

@@ -558,11 +558,11 @@ color: var(--blue);
   object-fit: cover;
 }
 
-.home_banner .profile_img{
+.home_banner .profile_img {
   position: relative;
 }
 
-.home_banner .profile_img #edit_profile{
+.home_banner .profile_img #edit_profile {
   position: absolute;
   top: 0;
   right: 0;
@@ -575,22 +575,24 @@ color: var(--blue);
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.home_banner .profile_img #edit_profile img{
-  width: 16px;
-  height: 16px;
+  overflow: hidden;
 }
 
-/* .home_banner .profile_img #edit_profile input{
-  position: absolute;
-  top: 0;
-  left: 0;
+/* Make the label act as clickable button */
+.home_banner .profile_img #edit_profile .edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
   cursor: pointer;
-  opacity: 1;
-  z-index: 99999;
-} */
+}
+
+/* Hide file input safely (works on all devices) */
+.home_banner .profile_img #edit_profile input {
+  display: none;
+}
+
 
 .top_sec{
   display: flex;

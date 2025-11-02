@@ -303,7 +303,7 @@ gap: 8px;
 .apply_page form  .form-group select,
 .apply_page form  .form-group textarea{
   padding: 8px 16px;
-  border-radius: 16px;
+  border-radius: 4px;
   border: solid rgba(0, 0, 0, 0.05) 1px;
   background: rgba(0, 0, 0, 0.05);
   min-height: 40px;
@@ -318,6 +318,8 @@ gap: 8px;
 .apply_page form .form-group.application_type{
   flex-direction: row;
   gap: 0;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .apply_page form .form-group.application_type>div{

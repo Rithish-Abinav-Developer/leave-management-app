@@ -131,7 +131,8 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
       <div className="home_banner entry_page_banner">
         <div className="profile_img">
           
-   <div id="edit_profile" style={{ position: "relative", width: "28px", height: "28px" }}>
+   
+       <div id="edit_profile" style={{ position: "relative", width: "28px", height: "28px" }}>
   <Image
     src={EditProfile}
     alt="edit-profile"
@@ -141,15 +142,14 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
     style={{ cursor: "pointer" }}
   />
 
+  {/* ✅ Works on Android + iOS + Desktop */}
   <input
     type="file"
     name="profileImage"
     accept="image/*"
-    ref={fileInputRef}
+    capture=""
     onChange={handleFileChange}
-    onClick={(e) => {
-      e.target.value = null; // Android fix
-    }}
+    onClick={(e) => (e.target.value = null)}
     style={{
       position: "absolute",
       top: 0,

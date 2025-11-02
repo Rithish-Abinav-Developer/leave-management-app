@@ -67,7 +67,7 @@ export default function AdminApplicationsPage() {
 
   return (
     <div className="apply_page apply_status_page">
-      {isLoading || isLoadingNotifications && <Loader />}
+      {isLoading || isLoadingNotifications || loading && <Loader />}
       <Header pageTitle="Status" />
       <div className="container">
         {/* Pending Applications */}

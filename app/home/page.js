@@ -132,8 +132,26 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
         <div className="profile_img">
           
       <div id="edit_profile">
-        <Image src={EditProfile} alt="edit-profile" width={24} height={24} loading="eager" id="" />
-         <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} />
+      <div id="edit_profile">
+  <label htmlFor="profileUpload">
+    <Image
+      src={EditProfile}
+      alt="edit-profile"
+      width={24}
+      height={24}
+      loading="eager"
+    />
+  </label>
+  <input
+    id="profileUpload"
+    type="file"
+    accept="image/*"
+    ref={fileInputRef}
+    onChange={handleFileChange}
+    style={{ display: "none" }}
+  />
+</div>
+
          </div>
      
         <Image src={profilePic || profile} alt="profile" width={75} height={75} loading="eager" />

@@ -10,6 +10,7 @@ import Loader from "@/app/components/Loader";
 export default function AdminApplicationsPage() {
   const [adminName, setAdminName] = useState("");
   const [isClient, setIsClient] = useState(false); 
+  const [loading,setLoading] = useState(false);
 
 
   useEffect(() => {
@@ -50,12 +51,17 @@ export default function AdminApplicationsPage() {
   );
 
   const updateStatus = async (id, status, name) => {
+    setLoading(true);
     try {
       await axios.put(`/api/status/${id}`, { status });
       await axios.put(`/api/login/update-status/${name}`, { increment: true });
       refetch();
+    setLoading(false);
+
     } catch (err) {
       console.error("Error updating status:", err);
+    setLoading(false);
+
     }
   };
 

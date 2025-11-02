@@ -560,7 +560,6 @@ color: var(--blue);
 
 .home_banner .profile_img {
   position: relative;
-  pointer-events: none;
 }
 
 .home_banner .profile_img #edit_profile {

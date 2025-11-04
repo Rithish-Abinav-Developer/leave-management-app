@@ -124,7 +124,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
   return (
     <div className="apply_page">
       {userLoading &&  <Loader/> }
-      {loading &&  <Loader/> }
+      {loading || todayLeaveLoading || recentLeaveLoading &&  <Loader/> }
      
       <Header pageTitle="Home" />
 
@@ -133,7 +133,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
           
    
         <Image src={EditProfile} alt="edit-profile" width={24} height={24} loading="eager" id="edit_profile"  onClick={handleImageClick}/>
-         <input type="file" name="profileImage"   ref={fileInputRef} onChange={handleFileChange} style={{display:"none"}}  />
+         <input type="file" name="profileImage" accept="image/jpeg, image/webp, image/png"  ref={fileInputRef} onChange={handleFileChange} style={{display:"none"}}  />
    
      
         <Image src={profilePic || profile} alt="profile" width={75} height={75} loading="eager" />

@@ -1,16 +1,20 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import logo from "@/app/src/logo.png";
 import settings from "@/app/src/setting.svg";
 import notification from "@/app/src/notification.svg";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 export default function Header({ currentNotificationCount,pageTitle }) {
   const [notificationNumber, setNotificationNumber] = useState(0);
 
   const[showLogout,setShowLogout] = useState(false);
+
+  const notificationBtn = useRef(null);
+ const router = useRouter();
 
   
   const {
@@ -86,6 +90,17 @@ export default function Header({ currentNotificationCount,pageTitle }) {
 }, [showLogout]);
 
 
+notificationBtn.current?.addEventListener("click", () => {
+  if(notificationNumber<1){
+  return;
+  }
+  if(userData.role==="Admin"){
+   router.push("/apply-status/admin");
+  }
+  else{
+    router.push("/apply-status/employee");
+  }
+});
 
 
   if (isUserLoading || isUserDataLoading)
@@ -98,12 +113,11 @@ export default function Header({ currentNotificationCount,pageTitle }) {
         <h1 className="page-title">{pageTitle}</h1>
 
         <div className="options">
-          <button className="notification">
+          <button className="notification button">
             <Image src={notification} alt="notification" width={24} height={24} />
-           <p id="count">0</p>
           </button>
 
-          <button className="settings">
+          <button className="settings button">
             <Image src={settings} alt="settings" width={24} height={24} />
           </button>
         </div>
@@ -133,7 +147,7 @@ export default function Header({ currentNotificationCount,pageTitle }) {
         <h1 className="page-title">{pageTitle}</h1>
 
         <div className="options">
-          <button className="notification button">
+          <button className="notification button" ref={notificationBtn}>
             <Image src={notification} alt="notification" width={24} height={24} />
             {notificationNumber > 0 && <p id="count">{notificationNumber}</p>}
           </button>

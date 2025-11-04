@@ -843,3 +843,14 @@ animation: spin 1s linear infinite;
     display: none;
   }
 }
+
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select,
+  textarea {
+    font-size: 16px;
+    transform: scale(0.875);
+    transform-origin: left center;
+  }
+}

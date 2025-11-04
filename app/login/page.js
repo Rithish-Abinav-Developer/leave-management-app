@@ -26,9 +26,13 @@ const [loading, setLoading] = useState(false);
 
   const loginMutation = useMutation({
     mutationFn: async (user) => {
-      const res = await axios.post("/api/login", user);
-      // console.log("Login response:", res.data);
-      return res.data;
+     try {
+  const res = await axios.post("/api/login", user);
+  return res.data;
+} catch (error) {
+  // rethrow so React Query onError still runs
+  throw error;
+}
     },
     onSuccess: (data) => {
       setErr(data.message);
@@ -39,16 +43,17 @@ const [loading, setLoading] = useState(false);
         name: data.user?.name,
         email: data.user?.email,
         role: data.user?.role,
+        division: data.user?.division,
         id: data.user?.id,
         profileImage: data.user?.profileImage,
       };
       
       localStorage.setItem("user", JSON.stringify(userData));
-      setLoading(false);
-      router.push("/home");
+      // setLoading(false);
+    setTimeout(() => router.push("/home"), 5000);
     },
     onError: (error) => {
-      console.error("Login error:", error);
+      console.error("Login error:", error.response?.data?.error || "Something went wrong");
       setLoading(false);
       setErr(error.response?.data?.error || "Something went wrong");
     },

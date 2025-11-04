@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import Loader from "../components/Loader";
 
 export default function Page() {
   const { data: allApplications, isLoading } = useQuery({
@@ -19,7 +20,7 @@ export default function Page() {
     },
   });
 
-  // ✅ Function to export selected data
+  // Function to export selected data
   const exportToExcel = () => {
     if (!allApplications || allApplications.length === 0) {
       alert("No data to export");
@@ -48,7 +49,7 @@ const exportData = allApplications.map((a) => ({
 
     // Create a new workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Applications");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Leave Applications");
 
     // Generate Excel buffer
     const excelBuffer = XLSX.write(workbook, {
@@ -65,6 +66,7 @@ const exportData = allApplications.map((a) => ({
 
   return (
     <div className="all_leaves">
+      {isLoading && <Loader/>}
       <Header pageTitle="Applications" />
 
       <div className="container">
@@ -82,6 +84,10 @@ const exportData = allApplications.map((a) => ({
             </button>
           </div>
 
+          {!allApplications || allApplications.length === 0?
+          ( <p className="txts">No applications found.</p>
+          ):
+(
           <ul className="all_leave_applications">
             {allApplications &&
               allApplications.map((application) => (
@@ -128,6 +134,8 @@ const exportData = allApplications.map((a) => ({
                 </li>
               ))}
           </ul>
+)
+          }
         </section>
       </div>
 

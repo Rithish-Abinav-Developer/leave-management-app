@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     password: String,
     role: String,
     hasSeen: Number,
+    division:String,
     profileImage: {
     type: String, // URL to image
     default: "",

@@ -14,11 +14,11 @@ export default function AdminApplicationsPage() {
 
 
   useEffect(() => {
-    setIsClient(true);
     const user = localStorage.getItem("user");
     if (user) {
       const parsed = JSON.parse(user);
       setAdminName(parsed.name);
+    setIsClient(true);
     }
   }, []);
 
@@ -38,7 +38,7 @@ export default function AdminApplicationsPage() {
       const res = await axios.put(`/api/login/update-status/${ adminName }`, { hasSeen: 0 });
       return res.data || [];
     },
-    enabled: isClient,
+     enabled: isClient && !!adminName, // ✅ ensures name is set
   });
 
   if (!isClient) return null; 

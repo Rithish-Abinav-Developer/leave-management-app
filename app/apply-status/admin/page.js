@@ -13,14 +13,15 @@ export default function AdminApplicationsPage() {
   const [loading,setLoading] = useState(false);
 
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      const parsed = JSON.parse(user);
-      setAdminName(parsed.name);
-    setIsClient(true);
-    }
-  }, []);
+useEffect(() => {
+  const user = localStorage.getItem("user");
+  if (user) {
+    const parsed = JSON.parse(user);
+    setAdminName(parsed.name);
+  }
+  setIsClient(true); 
+}, []);
+
 
  
   const { data: applications = [], isLoading, refetch } = useQuery({
@@ -67,7 +68,7 @@ export default function AdminApplicationsPage() {
 
   return (
     <div className="apply_page apply_status_page">
-      {isLoading || isLoadingNotifications || loading && <Loader />}
+{(isLoading || isLoadingNotifications || loading) && <Loader />}
       <Header pageTitle="Status" />
       <div className="container">
         {/* Pending Applications */}

@@ -852,5 +852,7 @@ animation: spin 1s linear infinite;
     font-size: 16px;
     transform: scale(0.875);
     transform-origin: left center;
+    min-width: 100%;
+    width: 100%;
   }
 }

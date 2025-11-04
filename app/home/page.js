@@ -133,7 +133,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
           
    
         <Image src={EditProfile} alt="edit-profile" width={24} height={24} loading="eager" id="edit_profile"  onClick={handleImageClick}/>
-         <input type="file" name="profileImage" accept=".jpg, .jpeg, .png, .webp"  ref={fileInputRef} onChange={handleFileChange} style={{display:"none"}}  />
+         <input type="file" name="profileImage" accept="image/*,image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" capture="environment"  ref={fileInputRef} onChange={handleFileChange} style={{display:"none"}}  />
    
      
         <Image src={profilePic || profile} alt="profile" width={75} height={75} loading="eager" />

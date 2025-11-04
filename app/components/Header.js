@@ -4,12 +4,19 @@ import Image from "next/image";
 import logo from "@/app/src/logo.png";
 import settings from "@/app/src/setting.svg";
 import notification from "@/app/src/notification.svg";
+import Reload from "@/app/src/reload.svg";
+
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import Loader from "./Loader";
 
 export default function Header({ currentNotificationCount,pageTitle }) {
   const [notificationNumber, setNotificationNumber] = useState(0);
+
+  const[loading,setLoading] = useState(false);
+
+  const reloadBtn = useRef(null);
 
   const[showLogout,setShowLogout] = useState(false);
 
@@ -102,10 +109,27 @@ notificationBtn.current?.addEventListener("click", () => {
   }
 });
 
+useEffect(() => {
+  if (!reloadBtn.current) return;
+
+  const handleReload = () => {
+    setLoading(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 4000);
+  };
+
+  reloadBtn.current.addEventListener("click", handleReload);
+  return () => reloadBtn.current?.removeEventListener("click", handleReload);
+}, []);
+
+
+
 
   if (isUserLoading || isUserDataLoading)
     return (
        <header>
+        {loading && <Loader />}
       <nav>
         <div className="logo">
           <Image src={logo} alt="logo" width={55} height={24} />
@@ -113,7 +137,12 @@ notificationBtn.current?.addEventListener("click", () => {
         <h1 className="page-title">{pageTitle}</h1>
 
         <div className="options">
-          <button className="notification button">
+
+           <button className="button" ref={reloadBtn}>
+            <Image src={Reload} alt="reload" width={24} height={24} />
+          </button>
+
+           <button className=" button">
             <Image src={notification} alt="notification" width={24} height={24} />
           </button>
 
@@ -128,6 +157,7 @@ notificationBtn.current?.addEventListener("click", () => {
   if (isUserError)
     return (
       <header>
+         {loading && <Loader />}
         <nav>
           <div className="logo">
             <Image src={logo} alt="logo" width={55} height={24} />
@@ -140,6 +170,7 @@ notificationBtn.current?.addEventListener("click", () => {
 
   return (
     <header>
+       {loading && <Loader />}
       <nav>
         <div className="logo">
           <Image src={logo} alt="logo" width={55} height={24} />
@@ -147,10 +178,18 @@ notificationBtn.current?.addEventListener("click", () => {
         <h1 className="page-title">{pageTitle}</h1>
 
         <div className="options">
+
+             <button className="button" ref={reloadBtn}>
+            <Image src={Reload} alt="reload" width={24} height={24} />
+          </button>
+
+
           <button className="notification button" ref={notificationBtn}>
             <Image src={notification} alt="notification" width={24} height={24} />
             {notificationNumber > 0 && <p id="count">{notificationNumber}</p>}
           </button>
+
+          
 
           <div className="settings button"  onClick={(e) => {
     e.stopPropagation();

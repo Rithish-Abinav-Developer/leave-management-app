@@ -174,7 +174,7 @@ header nav{
 
 header nav .logo{
   filter: invert(1) brightness(100);
-  width: 25%;
+  width: 92px;
   display: flex;
   align-items: center;
 }
@@ -188,9 +188,9 @@ header nav h1{
 
 header nav .options{
   padding: 0;
-  width: 25%;
+  width: 92px;
   display: flex;
-  gap: 16px;
+  gap: 10px;
   justify-content: flex-end;
 }
 header nav .options .notification {
@@ -819,6 +819,8 @@ color: var(--blue);
   align-items: center;
   justify-content: center;
   z-index: 9999999;
+  top: 0;
+  left: 0;
 }
 
 .loader .spinner{

@@ -308,6 +308,7 @@ gap: 8px;
   min-height: 40px;
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
 }
 
 .apply_page form  .form-group textarea{

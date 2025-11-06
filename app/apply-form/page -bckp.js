@@ -5,17 +5,11 @@ import Footer from "../components/Footer";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "../components/Loader";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { setHours, setMinutes } from "date-fns"; 
-import leavesDates from "./leavesDates.js";
-
 
 export default function Page() {
 
   const [loading, setLoading] = useState(false);
-  const [isPeriodLocked, setIsPeriodLocked] = useState(false);
-
+  
 
 
   const [formData, setFormData] = useState({
@@ -176,156 +170,40 @@ const handleSubmit = async (e) => {
             </div>
           )}
 
-     
-<div className="form-group">
-  <label>
-    {formData.type === "Permission" ? "Select Date" : "Select From Date:"}
-  </label>
-  <DatePicker
-    selected={formData.date ? new Date(formData.date) : null}
-    onChange={(date) =>
-      setFormData((prev) => ({
-        ...prev,
-        date: date?.toISOString(),
-      }))
-    }
-    minDate={new Date()}
-    dateFormat="yyyy-MM-dd"
-    placeholderText="Select date"
-    className="date-picker"
-    filterDate={(date) => {
-      const day = date.getDay();
-      const formatted = date.toISOString().split("T")[0];
-      // Disable weekends & festival dates
-      return day !== 0 && day !== 6 && !leavesDates.includes(formatted);
-    }}
-  />
-</div>
+          <div className="form-group">
+            <label>{formData.type === "Permission"?"Select Date":"Select From Date:"}</label>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
 {formData.type === "Leave" && (
-  <div className="form-group">
-    <label>Select To Date</label>
-    <DatePicker
-      selected={formData.toDate ? new Date(formData.toDate) : null}
-    onChange={(date) => {
-  if (!date) return;
-
-  const formatted = date.toISOString().split("T")[0];
-  const day = date.getDay();
-
-  // Prevent selecting a weekend or public holiday as the endpoint (you already do this elsewhere)
-  if (day === 0 || day === 6 || leavesDates.includes(formatted)) {
-    alert("⚠️ Selected date is a holiday or weekend. Please choose another date.");
-    return;
-  }
-
-  if (!formData.date) {
-    alert("Please select From Date first.");
-    return;
-  }
-
-  const fromDate = new Date(formData.date);
-  const toDate = new Date(date);
-
-  if (toDate < fromDate) {
-    alert("⚠️ To Date cannot be before From Date.");
-    return;
-  }
-
-  // Count working days (days that are NOT weekend and NOT in leavesDates)
-  let workingDays = 0;
-  let weekendFound = false;
-  let publicHolidayFound = false;
-
-  const iter = new Date(fromDate);
-  while (iter <= toDate) {
-    const iso = iter.toISOString().split("T")[0];
-    const d = iter.getDay();
-
-    const isWeekend = d === 0 || d === 6;
-    const isPublicHoliday = leavesDates.includes(iso);
-
-    if (isPublicHoliday) {
-      publicHolidayFound = true;
-    } else if (isWeekend) {
-      weekendFound = true;
-    } else {
-      // it's a working day
-      workingDays++;
-    }
-
-    iter.setDate(iter.getDate() + 1);
-  }
-
-  // Extra days rule:
-  // +1 if any weekend exists between, +1 if any public holiday exists between
-  let extraDays = 0;
-  if (weekendFound) extraDays += 1;
-  if (publicHolidayFound) extraDays += 1;
-
-  const finalDays = workingDays + extraDays;
-
-  // Update state
-  setFormData((prev) => ({
-    ...prev,
-    toDate: date.toISOString(),
-    period: String(finalDays),
-  }));
-  setIsPeriodLocked(extraDays > 0);
-
-  // Inform the user if extras applied
-  if (extraDays > 0) {
-    const parts = [];
-    if (publicHolidayFound) parts.push("public holiday");
-    if (weekendFound) parts.push("weekend");
-    alert(`⚠️ Detected ${parts.join(" and ")} between the dates. Added ${extraDays} extra day(s). Total counted: ${finalDays} day(s).`);
-  }
-}}
-
-
-
-      minDate={formData.date ? new Date(formData.date) : new Date()}
-      dateFormat="yyyy-MM-dd"
-      placeholderText="Select to date"
-      className="date-picker"
-      filterDate={(date) => {
-        const day = date.getDay();
-        const formatted = date.toISOString().split("T")[0];
-        return day !== 0 && day !== 6 && !leavesDates.includes(formatted);
-      }}
-    />
-  </div>
+              <div className="form-group">
+            <label>Select To Date</label>
+            <input
+              type="date"
+              name="toDate"
+              value={formData.toDate}
+              onChange={handleChange}
+              required
+            />
+          </div>
 )}
-
-
 
           {formData.type === "Permission" && (
             <>
               <div className="form-group">
                 <label>Select Time:</label>
-<DatePicker
-  selected={
-    formData.time ? new Date(`1970-01-01T${formData.time}:00`) : null
-  }
-  onChange={(time) => {
-    if (time) {
-      const hours = String(time.getHours()).padStart(2, "0");
-      const minutes = String(time.getMinutes()).padStart(2, "0");
-      setFormData((prev) => ({ ...prev, time: `${hours}:${minutes}` }));
-    }
-  }}
-  showTimeSelect
-  showTimeSelectOnly
-  timeIntervals={30}
-  timeCaption="Time"
-  dateFormat="h:mm aa"  // ✅ 12-hour format with AM/PM
-  minTime={setHours(setMinutes(new Date(), 0), 9)}  // 09:00
- maxTime={setHours(setMinutes(new Date(), 30), 17)} // 17:30
-  placeholderText="Select time (9 AM - 5:30 PM)"
-/>
-
-
-
+                <input
+                  type="time"
+                  name="time"
+                  value={formData.time}
+                  onChange={handleChange}
+                />
               </div>
 
               <div className="form-group">
@@ -344,27 +222,23 @@ const handleSubmit = async (e) => {
             </>
           )}
 
-     {formData.type === "Leave" && (
-  <div className="form-group">
-    <label>Period of Leave:</label>
-    <select
-      name="period"
-      value={formData.period || ""}
-      disabled // always disabled
-    >
-      {formData.period ? (
-        <option value={formData.period}>
-          {Number(formData.period)} Day{Number(formData.period) > 1 ? "s" : ""} (Auto Calculated)
-        </option>
-      ) : (
-        <option>Auto calculated from dates...</option>
-      )}
-    </select>
-  </div>
-)}
-
-
-
+          {formData.type === "Leave" && (
+            <div className="form-group">
+              <label>Select Period:</label>
+              <select
+                name="period"
+                value={formData.period}
+                onChange={handleChange}
+              >
+                <option>Period of leave...</option>
+                {[...Array(10)].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {i + 1} Day{i > 0 ? "s" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="form-group">
             <label>Reason:</label>

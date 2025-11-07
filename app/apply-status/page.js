@@ -11,7 +11,7 @@ export default function Page() {
   const [userRole, setUserRole] = useState("");
   const [notificationCount, setNotificationCount] = useState(0);
 
-  // ✅ 1️⃣ Load user info from localStorage
+ 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -21,9 +21,9 @@ export default function Page() {
     }
   }, []);
 
-  // ✅ 2️⃣ Reset employee's notification count to 0 when visiting this page
+ 
   useEffect(() => {
-    // only run for employees after username is loaded
+   
     if (!username || userRole !== "employee") return;
 
     const resetHasSeen = async () => {
@@ -38,7 +38,7 @@ export default function Page() {
     resetHasSeen();
   }, [username, userRole]);
 
-  // ✅ 3️⃣ Fetch applications (React Query)
+
   const {
     data: userApplications = [],
     isLoading,
@@ -59,7 +59,6 @@ export default function Page() {
     enabled: !!username,
   });
 
-  // ✅ 4️⃣ Admin updates a user's status (increments their hasSeen)
   const updateStatus = async (applicationId, status, name) => {
   try {
     await axios.put(`/api/status/${applicationId}`, { status });
@@ -73,13 +72,11 @@ export default function Page() {
 };
 
 
-  // ✅ 5️⃣ Split applications
   const recentApplications = userApplications.filter((a) => a.status === "Pending");
   const pastApplications = userApplications.filter(
     (a) => a.status === "Approved" || a.status === "Rejected"
   );
 
-  // ✅ 6️⃣ Loading & error handling
   if (isLoading)
     return (
       <div className="apply_page apply_status_page">

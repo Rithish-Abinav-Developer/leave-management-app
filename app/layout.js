@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
     document.addEventListener("touchmove", preventPinch, { passive: false });
     document.addEventListener("touchend", preventDoubleTap, { passive: false });
 
-    // Cleanup
+ 
     return () => {
       document.removeEventListener("touchmove", preventPinch);
       document.removeEventListener("touchend", preventDoubleTap);

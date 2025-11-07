@@ -100,7 +100,6 @@ const sickLeave = Application?.filter(item => item.leaveType === "Sick Leave" &&
 const marriageLeave = Application?.filter(item => item.leaveType === "Marriage Leave" && item.status === "Approved") || [];
 const maternityLeave = Application?.filter(item => item.leaveType === "Maternity Leave" && item.status === "Approved") || [];
 const permission = Application?.filter(item => item.type === "Permission" && item.status === "Approved" ) || 0;
-console.log(permission)
 
 
 const {data:TodayLeave, isLoading:todayLeaveLoading} = useQuery({

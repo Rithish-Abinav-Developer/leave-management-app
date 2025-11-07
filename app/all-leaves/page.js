@@ -23,6 +23,20 @@ export default function Page() {
     }
     setIsClient(true); 
   }, []);
+
+useEffect(() => {
+  if (!adminName) return;
+  const updateStatus = async () => {
+    try {
+      await axios.put(`/api/login/update-status/${adminName}`, { hasSeen: 0 });
+    } catch (err) {
+      console.error("Failed to update status:", err);
+    }
+  };
+  updateStatus();
+}, [adminName, isClient]);
+
+
   
   
    
@@ -92,7 +106,7 @@ const exportData = allApplications.map((a) => ({
   return (
     <div className="all_leaves">
       {isLoading && <Loader/>}
-      <Header pageTitle="Applications" />
+      <Header pageTitle="Applications" currentNotificationCount={0} />
 
       <div className="container">
         <section className="applications">

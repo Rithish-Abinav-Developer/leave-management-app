@@ -5,172 +5,141 @@ import logo from "@/app/src/logo.png";
 import settings from "@/app/src/setting.svg";
 import notification from "@/app/src/notification.svg";
 import Reload from "@/app/src/reload.svg";
-
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import Loader from "./Loader";
 
-export default function Header({ currentNotificationCount,pageTitle }) {
+export default function Header({ currentNotificationCount, pageTitle }) {
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [notificationNumber, setNotificationNumber] = useState(0);
-
-  const[loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
 
   const reloadBtn = useRef(null);
-
-  const[showLogout,setShowLogout] = useState(false);
-
   const notificationBtn = useRef(null);
- const router = useRouter();
+  const router = useRouter();
 
-  
-  const {
-    data: user,
-    isLoading: isUserLoading,
-    isError: isUserError,
-  } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => {
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) throw new Error("No user found");
-      return JSON.parse(storedUser);
-    },
-  });
-
-
-  const {
-    data: userData,
-    isLoading: isUserDataLoading,
-    refetch: refetchUserData,
-  } = useQuery({
-    queryKey: ["userData", user?.id],
-    queryFn: async () => {
-      const res = await axios.get(`/api/login/${user.id}`);
-      setNotificationNumber(res.data.user.hasSeen ?? 0);
-      return res.data.user;
-    },
-    enabled: false, 
-    onSuccess: (data) => {
-      setNotificationNumber(data.hasSeen ?? 0);
-    },
-  });
-
-
+  // ✅ Get user from localStorage
   useEffect(() => {
-    if (user?.id) {
-      refetchUserData();
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      window.location.href = "/login";
+      return;
     }
-  }, [user, refetchUserData]);
+    const parsedUser = JSON.parse(storedUser);
+    setUser(parsedUser);
+  }, []);
 
-  
+  // ✅ Fetch user data (like notifications)
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const fetchUserData = async () => {
+      try {
+        const res = await axios.get(`/api/login/${user.id}`);
+        setUserData(res.data.user);
+        setNotificationNumber(res.data.user.hasSeen ?? 0);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+      }
+    };
+
+    fetchUserData();
+
+    // 🔁 Auto-refresh when window refocuses
+    const handleFocus = () => fetchUserData();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [user]);
+
+  // ✅ Update notification count when new value comes from parent
   useEffect(() => {
     if (currentNotificationCount !== undefined) {
       setNotificationNumber(currentNotificationCount);
     }
   }, [currentNotificationCount]);
 
- 
+  // ✅ Reload button
   useEffect(() => {
-    const handleFocus = () => refetchUserData();
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
-  }, [refetchUserData]);
+    if (!reloadBtn.current) return;
+    const handleReload = () => {
+      setLoading(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 4000);
+    };
+    reloadBtn.current.addEventListener("click", handleReload);
+    return () => reloadBtn.current?.removeEventListener("click", handleReload);
+  }, []);
 
-
-  useEffect(()=>{
-    const user = localStorage.getItem("user");
-    if (!user) {
-      window.location.href = "/login";
-    }
-  },[])
-
-  useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (showLogout) setShowLogout(false);
-  };
-
-  window.addEventListener("click", handleClickOutside);
-
-  return () => {
-    window.removeEventListener("click", handleClickOutside);
-  };
-}, [showLogout]);
-
-
-notificationBtn.current?.addEventListener("click", () => {
-  if(notificationNumber<1){
-  return;
-  }
-  if(userData.role==="Admin"){
-   router.push("/apply-status/admin");
-  }
-  else{
-    router.push("/apply-status/employee");
-  }
-});
-
+  // ✅ Notification button
 useEffect(() => {
-  if (!reloadBtn.current) return;
+  if (!notificationBtn.current) return;
 
-  const handleReload = () => {
-    setLoading(true);
-    setTimeout(() => {
-      window.location.reload();
-    }, 4000);
+  const handleNotificationClick = async () => {
+    if (notificationNumber < 1 || !userData) return;
+
+    try {
+      setLoading(true);
+
+      // Update status once
+      await axios.put(`/api/login/update-status/${user.name}`, { hasSeen: 0 });
+
+      if (userData.role === "admin") {
+        router.push("/apply-status/admin");
+      } else {
+        router.push("/apply-status/employee");
+      }
+
+    } catch (err) {
+      console.error("Failed to update notification status:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  reloadBtn.current.addEventListener("click", handleReload);
-  return () => reloadBtn.current?.removeEventListener("click", handleReload);
-}, []);
+  notificationBtn.current.addEventListener("click", handleNotificationClick);
+  return () => notificationBtn.current?.removeEventListener("click", handleNotificationClick);
+}, [notificationNumber, userData, router]);
 
 
+  // ✅ Close logout popup on outside click
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (showLogout) setShowLogout(false);
+    };
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, [showLogout]);
 
-
-  if (isUserLoading || isUserDataLoading)
-    return (
-       <header>
-        {loading && <Loader />}
-      <nav>
-        <div className="logo">
-          <Image src={logo} alt="logo" width={55} height={24} />
-        </div>
-        <h1 className="page-title">{pageTitle}</h1>
-
-        <div className="options">
-
-           <button className="button" ref={reloadBtn}>
-            <Image src={Reload} alt="reload" width={24} height={24} />
-          </button>
-
-           <button className=" button">
-            <Image src={notification} alt="notification" width={24} height={24} />
-          </button>
-
-          <button className="settings button">
-            <Image src={settings} alt="settings" width={24} height={24} />
-          </button>
-        </div>
-      </nav>
-    </header>
-    );
-
-  if (isUserError)
+  if (!user || !userData)
     return (
       <header>
-         {loading && <Loader />}
+        {loading && <Loader />}
         <nav>
           <div className="logo">
             <Image src={logo} alt="logo" width={55} height={24} />
           </div>
-          <h1 className="page-title">Error loading user</h1>
+          <h1 className="page-title">{pageTitle || "Loading..."}</h1>
+          <div className="options">
+            <button className="button" ref={reloadBtn}>
+              <Image src={Reload} alt="reload" width={24} height={24} />
+            </button>
+            <button className="button">
+              <Image src={notification} alt="notification" width={24} height={24} />
+            </button>
+            <button className="settings button">
+              <Image src={settings} alt="settings" width={24} height={24} />
+            </button>
+          </div>
         </nav>
       </header>
     );
 
-
   return (
     <header>
-       {loading && <Loader />}
+      {loading && <Loader />}
       <nav>
         <div className="logo">
           <Image src={logo} alt="logo" width={55} height={24} />
@@ -178,29 +147,33 @@ useEffect(() => {
         <h1 className="page-title">{pageTitle}</h1>
 
         <div className="options">
-
-             <button className="button" ref={reloadBtn}>
+          <button className="button" ref={reloadBtn}>
             <Image src={Reload} alt="reload" width={24} height={24} />
           </button>
-
 
           <button className="notification button" ref={notificationBtn}>
             <Image src={notification} alt="notification" width={24} height={24} />
             {notificationNumber > 0 && <p id="count">{notificationNumber}</p>}
           </button>
 
-          
-
-          <div className="settings button"  onClick={(e) => {
-    e.stopPropagation();
-    setShowLogout(!showLogout);
-  }}>
+          <div
+            className="settings button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowLogout(!showLogout);
+            }}
+          >
             <Image src={settings} alt="settings" width={24} height={24} />
             {showLogout && (
-              <button className="logout" onClick={() => {
-                localStorage.removeItem("user");
-                window.location.href = "/login";
-              }}>Log Out</button>
+              <button
+                className="logout"
+                onClick={() => {
+                  localStorage.removeItem("user");
+                  window.location.href = "/login";
+                }}
+              >
+                Log Out
+              </button>
             )}
           </div>
         </div>

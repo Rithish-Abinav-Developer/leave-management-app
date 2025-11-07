@@ -30,7 +30,7 @@ const { data: applications = [], isLoading, refetch } = useQuery({
     const res = await axios.get(`/api/applications?admin=${adminName}`);
     return res.data.userApplications || [];
   },
-  enabled: !!adminName && isClient, // only fetch when adminName is available
+  enabled: !!adminName && isClient,
 });
 
 
@@ -40,7 +40,7 @@ const { data: applications = [], isLoading, refetch } = useQuery({
       const res = await axios.put(`/api/login/update-status/${ adminName }`, { hasSeen: 0 });
       return res.data || [];
     },
-     enabled: isClient && !!adminName, // ✅ ensures name is set
+     enabled: isClient && !!adminName,  
   });
 
   if (!isClient) return null; 

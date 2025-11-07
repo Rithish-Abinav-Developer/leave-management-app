@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import axios from "axios";
@@ -16,6 +16,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [isPeriodLocked, setIsPeriodLocked] = useState(false);
 
+  const [user, setUser] = useState(null);
 
 
   const [formData, setFormData] = useState({
@@ -37,14 +38,22 @@ export default function Page() {
     status: "Pending",
   });
 
-  const { data: user, isLoading, isError } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => {
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) throw new Error("No user found");
-      return JSON.parse(storedUser);
-    },
-  });
+  // const { data: user, isLoading, isError } = useQuery({
+  //   queryKey: ["user"],
+  //   queryFn: async () => {
+  //     const storedUser = localStorage.getItem("user");
+  //     if (!storedUser) throw new Error("No user found");
+  //     return JSON.parse(storedUser);
+  //   },
+  // });
+
+  useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    setUser(JSON.parse(storedUser));
+  }
+  setLoading(false);
+}, []);
 
   React.useEffect(() => {
     if (user) {
@@ -62,6 +71,20 @@ export default function Page() {
 
 const handleChange = (e) => {
   const { name, value, type, files } = e.target;
+  console.log(name)
+
+ if (name === "leaveType") {
+  console.log("Leave type changed to:", value);
+  setFormData((prev) => ({
+    ...prev,
+    leaveType: value,
+    date: "",
+    toDate: "",
+    period: "",
+  }));
+  return;
+}
+
 
   if (name === "type") {
     setFormData((prev) => ({
@@ -88,6 +111,11 @@ const handleChange = (e) => {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
+  
+  if (!user) {
+    alert("User not loaded yet. Please wait a moment.");
+    return;
+  }
   setLoading(true);
 
   if (formData.type === "Leave") {
@@ -95,6 +123,13 @@ const handleSubmit = async (e) => {
       alert("⚠️ Please select a leave type.");
       setLoading(false);
       return;
+    }
+    if(formData.leaveType === "Sick Leave"){
+      if (!formData.file || formData.file===null) {
+        alert("⚠️ Please upload a medical certificate.");
+        setLoading(false);
+        return;
+      }
     }
     if (!formData.date) {
       alert("⚠️ Please select From Date.");
@@ -154,10 +189,31 @@ const handleSubmit = async (e) => {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
-    await axios.post("/api/admin-notification", {});
+    // await axios.post("/api/admin-notification", {});
+    
 
     alert("Form submitted successfully!");
-    setFormData(prev => ({ ...Object.fromEntries(Object.keys(prev).map(k => [k, ""])), type: "Leave", file: null }));
+const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+
+setFormData({
+  name: storedUser?.name || "",
+  email: storedUser?.email || "",
+  role: storedUser?.role || "",
+  division: storedUser?.division || "",
+  admin: storedUser?.admin || "",
+  userId: storedUser?.id || "",
+  type: "Leave",
+  leaveType: "",
+  date: "",
+  toDate: "",
+  time: "",
+  hours: "",
+  period: "",
+  reason: "",
+  file: null,
+  status: "Pending",
+});
+ await axios.put(`/api/login/update-status/${storedUser?.admin}`, { increment: true });
     setLoading(false);
   } catch (error) {
     console.error("Error submitting:", error);
@@ -168,11 +224,11 @@ const handleSubmit = async (e) => {
 
 
   // if (isLoading) return <p>Loading user info...</p>;
-  if (isError) return <p>Error loading user info.</p>;
+
 
   return (
     <div className="apply_page">
-      {isLoading || loading && <Loader />}
+      { loading && <Loader />}
       <Header pageTitle={'Apply Form'} />
 
       <div className="container">
@@ -238,7 +294,9 @@ const handleSubmit = async (e) => {
         date: date ? date.toLocaleDateString("en-CA") : "",
       }))
     }
-    minDate={new Date()}
+    minDate={formData.leaveType === "Sick Leave" ? null : new Date()}
+maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
+
     dateFormat="yyyy-MM-dd"
     placeholderText="Select date"
     className="date-picker"
@@ -335,6 +393,8 @@ console.log(date.toLocaleDateString("en-CA"))
 
 
       minDate={formData.date ? new Date(formData.date) : new Date()}
+maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
+
       dateFormat="yyyy-MM-dd"
       placeholderText="Select to date"
       className="date-picker"

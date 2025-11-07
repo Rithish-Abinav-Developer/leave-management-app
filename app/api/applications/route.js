@@ -41,7 +41,7 @@ export async function POST(req) {
 
     let fileUrl = null;
 
-    // ✅ Upload file to S3 if present
+  
     if (file && file.size > 0 && file.type) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
@@ -59,7 +59,7 @@ export async function POST(req) {
       fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
     }
 
-    // ✅ Save new application
+   
     const application = new Application({
       name,
       email,
@@ -82,13 +82,14 @@ export async function POST(req) {
 
     await application.save();
 
-    // ✅ Find admin details
+   
     const applicationAdmin = await Users.find({ name: admin });
+    console.log(applicationAdmin);
     if (!applicationAdmin.length) {
       throw new Error(`No admin found with name: ${admin}`);
     }
 
-    // ✅ Email setup
+  
     const subject = `Leave Application Submitted by ${name} (${leaveType})`;
 
     const approveLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/approve?id=${application._id}`;
@@ -164,7 +165,7 @@ export async function POST(req) {
   }
 }
 
-// ✅ GET: fetch applications by admin
+
 export async function GET(req) {
   try {
     await connectMongo();

@@ -24,14 +24,15 @@ useEffect(() => {
 
 
  
-  const { data: applications = [], isLoading, refetch } = useQuery({
-    queryKey: ["adminApplications"],
-    queryFn: async () => {
-      const res = await axios.get("/api/applications");
-      return res.data.userApplications || [];
-    },
-    enabled: isClient,
-  });
+const { data: applications = [], isLoading, refetch } = useQuery({
+  queryKey: ["adminApplications", adminName],
+  queryFn: async () => {
+    const res = await axios.get(`/api/applications?admin=${adminName}`);
+    return res.data.userApplications || [];
+  },
+  enabled: !!adminName && isClient, // only fetch when adminName is available
+});
+
 
   const { data: adminNotifications = [], isLoading: isLoadingNotifications} = useQuery({
     queryKey: ["adminNotifications"],

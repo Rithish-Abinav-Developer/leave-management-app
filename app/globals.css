@@ -843,6 +843,23 @@ animation: spin 1s linear infinite;
 display: none;
 }
 
+.application_apply_redirect{
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.application_apply_redirect h1{
+  font-size: 24px;
+  line-height: 32px;
+  margin-bottom: 16px;
+}
+
+.warning{
+  color: red !important;
+}
 
 
 @media screen and (min-width:767px) {

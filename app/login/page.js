@@ -28,6 +28,7 @@ const [loading, setLoading] = useState(false);
     mutationFn: async (user) => {
      try {
   const res = await axios.post("/api/login", user);
+  console.log(res.data);
   return res.data;
 } catch (error) {
   // rethrow so React Query onError still runs
@@ -43,6 +44,7 @@ const [loading, setLoading] = useState(false);
         name: data.user?.name,
         email: data.user?.email,
         role: data.user?.role,
+        admin: data.user?.admin,
         division: data.user?.division,
         id: data.user?.id,
         profileImage: data.user?.profileImage,

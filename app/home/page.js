@@ -21,6 +21,7 @@ import PartyImage from '@/app/src/party-gif.webp'
 import Loader from "../components/Loader";
 import EditProfile from "@/app/src/edit.svg";
 import TimeIcon from "@/app/src/time-icon.svg";
+import PermissionIcon from "@/app/src/permissionIcon.svg";
 
 
 export default function Page() {
@@ -98,6 +99,8 @@ const casualLeave = Application?.filter(item => item.leaveType === "Casual Leave
 const sickLeave = Application?.filter(item => item.leaveType === "Sick Leave" && item.status === "Approved") || [];
 const marriageLeave = Application?.filter(item => item.leaveType === "Marriage Leave" && item.status === "Approved") || [];
 const maternityLeave = Application?.filter(item => item.leaveType === "Maternity Leave" && item.status === "Approved") || [];
+const permission = Application?.filter(item => item.type === "Permission" && item.status === "Approved" ) || 0;
+console.log(permission)
 
 
 const {data:TodayLeave, isLoading:todayLeaveLoading} = useQuery({
@@ -160,7 +163,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
         <div>
 <Image src={casualLeaveIcon} alt="casual-leave-icon" width={35} height={35} />
 <span>
-    <p>{casualLeave?.length || 0}</p>/<p>12</p>
+    <p className={`${casualLeave?.length> 12 ? "warning" : ""}`}>{casualLeave?.length || 0}</p>/<p>12</p>
 </span>
         </div>
         <p>Casual Leave</p>
@@ -170,7 +173,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
         <div>
 <Image src={sickLeaveIcon} alt="sick-leave-icon" width={35} height={35} />
 <span>
-    <p>{sickLeave?.length || 0}</p>/<p>12</p>
+    <p className={`${sickLeave?.length > 12 ? "warning" : ""}`}>{sickLeave?.length || 0}</p>/<p>12</p>
 </span>
         </div>
         <p>Sick Leave</p>
@@ -178,15 +181,15 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
 
          <div className="card">
         <div>
-<Image src={marriageLeaveIcon} alt="casual-leave-icon" width={35} height={35} />
+<Image src={PermissionIcon} alt="permission-icon" width={35} height={35} />
 <span>
-    <p>{marriageLeave?.length || 0}</p>/<p>05</p>
+    <p className={`${permission?.length > 2 ? "warning" : ""}`}>{permission?.length || 0}</p>/<p>02</p>
 </span>
         </div>
-        <p>Marriage Leave</p>
+        <p>Permissions</p>
     </div>
 
-     <div className="card">
+     {/* <div className="card">
         <div>
 <Image src={maternityLeaveIcon} alt="casual-leave-icon" width={35} height={35} />
 <span>
@@ -194,7 +197,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
 </span>
         </div>
         <p>Maternity Leave</p>
-    </div>
+    </div> */}
 
 
 
@@ -241,7 +244,8 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
               width={16}
               height={16}
             />{" "}
-            {new Date(item.date).toLocaleDateString("en-GB")}
+            {/* {new Date(item.date).toLocaleDateString("en-GB")} */}
+            {item.division}
           </p>
         </div>
       </div>

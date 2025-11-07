@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import connectMongo from "@/utils/connectMongo";
 import Application from "@/models/Application";
+import Users from "@/models/Users";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import axios from "axios";
 
-export const runtime = "nodejs"; 
+export const runtime = "nodejs";
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -22,6 +24,8 @@ export async function POST(req) {
     const name = formData.get("name");
     const email = formData.get("email");
     const role = formData.get("role");
+    const division = formData.get("division");
+    const admin = formData.get("admin");
     const type = formData.get("type");
     const leaveType = formData.get("leaveType");
     const date = formData.get("date");
@@ -37,6 +41,7 @@ export async function POST(req) {
 
     let fileUrl = null;
 
+    // ✅ Upload file to S3 if present
     if (file && file.size > 0 && file.type) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
@@ -54,10 +59,13 @@ export async function POST(req) {
       fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
     }
 
+    // ✅ Save new application
     const application = new Application({
       name,
       email,
       role,
+      division,
+      admin,
       type,
       leaveType,
       date,
@@ -74,9 +82,77 @@ export async function POST(req) {
 
     await application.save();
 
+    // ✅ Find admin details
+    const applicationAdmin = await Users.find({ name: admin });
+    if (!applicationAdmin.length) {
+      throw new Error(`No admin found with name: ${admin}`);
+    }
+
+    // ✅ Email setup
+    const subject = `Leave Application Submitted by ${name} (${leaveType})`;
+
+    const approveLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/approve?id=${application._id}`;
+    const rejectLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/reject?id=${application._id}`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #f7f9fc; padding: 20px;">
+        <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <h2 style="color: #2c3e50;">New Leave Application Received</h2>
+
+          <p style="font-size: 15px;">Dear ${admin},</p>
+          <p style="font-size: 15px;">An employee <strong>${name}</strong> has submitted a new <strong>${leaveType}</strong> application. Please review the details below:</p>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+            <tr><td style="padding: 8px; border: 1px solid #ddd;">Employee Name</td><td style="padding: 8px; border: 1px solid #ddd;">${name}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #ddd;">Email</td><td style="padding: 8px; border: 1px solid #ddd;">${email}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #ddd;">Role</td><td style="padding: 8px; border: 1px solid #ddd;">${role}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #ddd;">Division</td><td style="padding: 8px; border: 1px solid #ddd;">${division}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #ddd;">Leave Type</td><td style="padding: 8px; border: 1px solid #ddd;">${leaveType}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #ddd;">From</td><td style="padding: 8px; border: 1px solid #ddd;">${date}</td></tr>
+            ${toDate ? `<tr><td style="padding: 8px; border: 1px solid #ddd;">To</td><td style="padding: 8px; border: 1px solid #ddd;">${toDate}</td></tr>` : ""}
+            ${time ? `<tr><td style="padding: 8px; border: 1px solid #ddd;">Time</td><td style="padding: 8px; border: 1px solid #ddd;">${time}</td></tr>` : ""}
+            ${hours ? `<tr><td style="padding: 8px; border: 1px solid #ddd;">Duration</td><td style="padding: 8px; border: 1px solid #ddd;">${hours} hour(s)</td></tr>` : ""}
+            ${period ? `<tr><td style="padding: 8px; border: 1px solid #ddd;">Period</td><td style="padding: 8px; border: 1px solid #ddd;">${period}</td></tr>` : ""}
+            <tr><td style="padding: 8px; border: 1px solid #ddd;">Reason</td><td style="padding: 8px; border: 1px solid #ddd;">${reason}</td></tr>
+          </table>
+
+          ${fileUrl ? `
+          <p style="margin-top: 16px;">
+            📎 <a href="${fileUrl}" target="_blank" style="color: #2980b9; text-decoration: none;">View Attached Document</a>
+          </p>` : ""}
+
+          <div style="margin-top: 24px; text-align: center;">
+            <a href="${approveLink}" 
+              style="display: inline-block; background-color: #27ae60; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-right: 10px; font-weight: bold;">
+              ✅ Approve
+            </a>
+            <a href="${rejectLink}" 
+              style="display: inline-block; background-color: #e74c3c; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+              ❌ Reject
+            </a>
+          </div>
+
+          <p style="margin-top: 24px; font-size: 13px; color: #7f8c8d; text-align: center;">
+            This is an automated message from the Leave Management System.
+          </p>
+        </div>
+      </div>
+    `;
+
+
+    // await axios.post(
+    //   `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-mail`,
+    //   {
+    //     // to: applicationAdmin[0].email,
+    //     to:'amuthathulasi1302@gmail.com',
+    //     subject,
+    //     html,
+    //   }
+    // );
+
     return NextResponse.json({
       success: true,
-      message: "Application saved and file uploaded successfully!",
+      message: "Application saved, file uploaded, and email sent successfully!",
       fileUrl,
     });
   } catch (err) {
@@ -88,17 +164,18 @@ export async function POST(req) {
   }
 }
 
-
+// ✅ GET: fetch applications by admin
 export async function GET(req) {
   try {
     await connectMongo();
 
-    const userApplications = await Application.find();
+    const { searchParams } = new URL(req.url);
+    const admin = searchParams.get("admin");
 
-    return NextResponse.json({
-      success: true,
-      userApplications,
-    });
+    const query = admin ? { admin } : {};
+    const userApplications = await Application.find(query);
+
+    return NextResponse.json({ success: true, userApplications });
   } catch (err) {
     console.error("Error fetching applications:", err);
     return NextResponse.json(

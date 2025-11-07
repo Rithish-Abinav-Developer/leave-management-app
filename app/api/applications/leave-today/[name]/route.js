@@ -6,36 +6,36 @@ export async function GET(req, { params }) {
   try {
     await connectMongo();
 
-    const { name } = await params;
+    const { name } = params;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // 🔹 Get today's full range (local timezone)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
 
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
 
-    const utcToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
-    // console.log("UTC Today:", utcToday);
+    // 🔹 Convert to UTC to match stored ISO dates in Mongo
+    const utcStart = new Date(startOfDay.getTime() - startOfDay.getTimezoneOffset() * 60000);
+    const utcEnd = new Date(endOfDay.getTime() - endOfDay.getTimezoneOffset() * 60000);
 
     const applications = await Application.aggregate([
       {
         $match: {
-          name: { $ne: name }, 
+          name: { $ne: name },
           status: "Approved",
-          date: { $lte: utcToday },
-          toDate: { $gte: utcToday },
+          date: { $lte: utcEnd },
+          toDate: { $gte: utcStart },
         },
       },
-      {
-        $sort: { date: -1 }, 
-      },
+      { $sort: { date: -1 } },
       {
         $group: {
-          _id: "$userId", 
+          _id: "$userId",
           latestApplication: { $first: "$$ROOT" },
         },
       },
-      {
-        $replaceRoot: { newRoot: "$latestApplication" },
-      },
+      { $replaceRoot: { newRoot: "$latestApplication" } },
     ]);
 
     if (applications.length === 0) {

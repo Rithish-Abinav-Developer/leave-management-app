@@ -5,6 +5,8 @@ const ApplicationSchema = new mongoose.Schema({
     name:String,
     email:String,
     role:String,
+    division:String,
+    admin:String,
   type: String,
   leaveType: String,
   date: Date,

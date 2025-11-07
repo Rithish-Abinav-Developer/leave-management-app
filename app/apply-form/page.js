@@ -23,6 +23,8 @@ export default function Page() {
     name: "",
     email: "",
     role: "",
+    division:"",
+    admin:"",
     type: "Leave",
     leaveType: "",
     date: "",
@@ -51,6 +53,8 @@ export default function Page() {
         name: user.name || "",
         email: user.email || "",
         role: user.role || "",
+        admin: user.admin || "",
+        division: user.division || "",
         userId: user.id || "",
       }));
     }
@@ -85,6 +89,51 @@ const handleChange = (e) => {
 const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
+
+  if (formData.type === "Leave") {
+    if (!formData.leaveType) {
+      alert("⚠️ Please select a leave type.");
+      setLoading(false);
+      return;
+    }
+    if (!formData.date) {
+      alert("⚠️ Please select From Date.");
+      setLoading(false);
+      return;
+    }
+    if (!formData.toDate) {
+      alert("⚠️ Please select To Date.");
+      setLoading(false);
+      return;
+    }
+    if (!formData.reason.trim()) {
+      alert("⚠️ Please enter the reason for leave.");
+      setLoading(false);
+      return;
+    }
+  } else if (formData.type === "Permission") {
+    if (!formData.date) {
+      alert("⚠️ Please select a Date.");
+      setLoading(false);
+      return;
+    }
+    if (!formData.time) {
+      alert("⚠️ Please select a Time.");
+      setLoading(false);
+      return;
+    }
+    if (!formData.hours) {
+      alert("⚠️ Please select Hours of permission.");
+      setLoading(false);
+      return;
+    }
+    if (!formData.reason.trim()) {
+      alert("⚠️ Please enter the reason for permission.");
+      setLoading(false);
+      return;
+    }
+  }
+
 
   const data = new FormData();
 
@@ -186,7 +235,7 @@ const handleSubmit = async (e) => {
     onChange={(date) =>
       setFormData((prev) => ({
         ...prev,
-        date: date?.toISOString(),
+        date: date ? date.toLocaleDateString("en-CA") : "",
       }))
     }
     minDate={new Date()}
@@ -224,13 +273,14 @@ const handleSubmit = async (e) => {
     return;
   }
 
-  const fromDate = new Date(formData.date);
-  const toDate = new Date(date);
+const fromDate = new Date(`${formData.date}T00:00:00`);
+const toDate = new Date(`${date.toLocaleDateString("en-CA")}T00:00:00`);
 
-  if (toDate < fromDate) {
-    alert("⚠️ To Date cannot be before From Date.");
-    return;
-  }
+if (toDate.getTime() < fromDate.getTime()) {
+  alert("⚠️ To Date cannot be before From Date.");
+  return;
+}
+
 
   // Count working days (days that are NOT weekend and NOT in leavesDates)
   let workingDays = 0;
@@ -264,11 +314,11 @@ const handleSubmit = async (e) => {
   if (publicHolidayFound) extraDays += 1;
 
   const finalDays = workingDays + extraDays;
-
+console.log(date.toLocaleDateString("en-CA"))
   // Update state
   setFormData((prev) => ({
     ...prev,
-    toDate: date.toISOString(),
+    toDate: date ? date.toLocaleDateString("en-CA") : "",
     period: String(finalDays),
   }));
   setIsPeriodLocked(extraDays > 0);
@@ -312,15 +362,16 @@ const handleSubmit = async (e) => {
       const hours = String(time.getHours()).padStart(2, "0");
       const minutes = String(time.getMinutes()).padStart(2, "0");
       setFormData((prev) => ({ ...prev, time: `${hours}:${minutes}` }));
+
     }
   }}
   showTimeSelect
   showTimeSelectOnly
   timeIntervals={30}
   timeCaption="Time"
-  dateFormat="h:mm aa"  // ✅ 12-hour format with AM/PM
-  minTime={setHours(setMinutes(new Date(), 0), 9)}  // 09:00
- maxTime={setHours(setMinutes(new Date(), 30), 17)} // 17:30
+  dateFormat="h:mm aa" 
+  minTime={setHours(setMinutes(new Date(), 0), 9)} 
+ maxTime={setHours(setMinutes(new Date(), 30), 17)} 
   placeholderText="Select time (9 AM - 5:30 PM)"
 />
 

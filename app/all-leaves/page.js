@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import rightArrow from "@/app/src/right-arrow.svg";
@@ -11,14 +11,39 @@ import { saveAs } from "file-saver";
 import Loader from "../components/Loader";
 
 export default function Page() {
-  const { data: allApplications, isLoading } = useQuery({
-    queryKey: ["allApplications"],
+
+ const [adminName, setAdminName] = useState("");
+  const [isClient, setIsClient] = useState(false); 
+  
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      const parsed = JSON.parse(user);
+      setAdminName(parsed.name);
+    }
+    setIsClient(true); 
+  }, []);
+  
+  
+   
+  const { data: allApplications = [], isLoading, refetch } = useQuery({
+    queryKey: ["adminApplications", adminName],
     queryFn: async () => {
-      const res = await axios.get("/api/applications");
-      console.log(res.data.userApplications);
-      return res.data.userApplications;
+      const res = await axios.get(`/api/applications?admin=${adminName}`);
+      return res.data.userApplications || [];
     },
+    enabled: !!adminName && isClient, // only fetch when adminName is available
   });
+
+
+  // const { data: allApplications, isLoading } = useQuery({
+  //   queryKey: ["allApplications"],
+  //   queryFn: async () => {
+  //     const res = await axios.get("/api/applications");
+  //     console.log(res.data.userApplications);
+  //     return res.data.userApplications;
+  //   },
+  // });
 
   // Function to export selected data
   const exportToExcel = () => {

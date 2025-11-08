@@ -94,7 +94,10 @@ export async function POST(req) {
     }
 
   
-    const subject = `Leave Application Submitted by ${name} (${leaveType})`;
+  
+   const subject = `Leave Application Submitted by ${name} (${type === "Leave" ? leaveType : type})`;
+
+
 
     const approveLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/approve?id=${application._id}`;
     const rejectLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/reject?id=${application._id}`;

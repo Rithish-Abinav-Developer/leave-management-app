@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const { to, subject, html } = await req.json();
+    const {from,replyTo, to, subject, html } = await req.json();
 
     if (!to || !subject || !html) {
       return NextResponse.json(
@@ -26,7 +26,8 @@ export async function POST(req) {
 
     // Email options
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from,
+      replyTo,
       to,
       subject,
       html,

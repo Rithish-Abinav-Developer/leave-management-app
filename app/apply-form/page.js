@@ -352,6 +352,8 @@ const calculateTotalPeriod = (fromDateStr, toDateStr, fromP, toP) => {
         return day !== 0 && day !== 6 && !leavesDates.includes(formatted);
       }}
     />
+
+    {formData.type === "Leave" && (
     <select className="period_select"
       name="fromPeriod"
       value={formData.fromPeriod}
@@ -369,6 +371,7 @@ const calculateTotalPeriod = (fromDateStr, toDateStr, fromP, toP) => {
       <option value={1}>Full Day</option>
       <option value={0.5}>Half Day</option>
     </select>
+    )}
   </div>
 </div>
 

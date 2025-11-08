@@ -170,15 +170,17 @@ export async function POST(req) {
 
 
 
-    await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-mail`,
-      {
-        from: `"${name}" <${email}>`,
-        to: applicationAdmin[0].email,
-        subject,
-        html,
-      }
-    );
+ await axios.post(
+  `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-mail`,
+  {
+    from: `"Leave System" <${process.env.EMAIL_USER}>`,
+    replyTo: `"${name}" <${email}>`, 
+    to: applicationAdmin[0].email,
+    subject,
+    html,
+  }
+);
+
 
     return NextResponse.json({
       success: true,

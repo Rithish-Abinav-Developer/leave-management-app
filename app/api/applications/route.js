@@ -173,6 +173,7 @@ export async function POST(req) {
     await axios.post(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-mail`,
       {
+        from: `"${name}" <${email}>`,
         to: applicationAdmin[0].email,
         subject,
         html,

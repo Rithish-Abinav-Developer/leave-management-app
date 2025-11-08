@@ -20,7 +20,7 @@ export default function Header({ currentNotificationCount, pageTitle }) {
   const notificationBtn = useRef(null);
   const router = useRouter();
 
-  // ✅ Get user from localStorage
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -31,7 +31,7 @@ export default function Header({ currentNotificationCount, pageTitle }) {
     setUser(parsedUser);
   }, []);
 
-  // ✅ Fetch user data (like notifications)
+
   useEffect(() => {
     if (!user?.id) return;
 
@@ -47,20 +47,20 @@ export default function Header({ currentNotificationCount, pageTitle }) {
 
     fetchUserData();
 
-    // 🔁 Auto-refresh when window refocuses
+
     const handleFocus = () => fetchUserData();
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
   }, [user]);
 
-  // ✅ Update notification count when new value comes from parent
+
   useEffect(() => {
     if (currentNotificationCount !== undefined) {
       setNotificationNumber(currentNotificationCount);
     }
   }, [currentNotificationCount]);
 
-  // ✅ Reload button
+
   useEffect(() => {
     if (!reloadBtn.current) return;
     const handleReload = () => {
@@ -73,7 +73,7 @@ export default function Header({ currentNotificationCount, pageTitle }) {
     return () => reloadBtn.current?.removeEventListener("click", handleReload);
   }, []);
 
-  // ✅ Notification button
+
 useEffect(() => {
   if (!notificationBtn.current) return;
 
@@ -83,7 +83,6 @@ useEffect(() => {
     try {
       setLoading(true);
 
-      // Update status once
       await axios.put(`/api/login/update-status/${user.name}`, { hasSeen: 0 });
 
       if (userData.role === "admin") {
@@ -104,7 +103,6 @@ useEffect(() => {
 }, [notificationNumber, userData, router]);
 
 
-  // ✅ Close logout popup on outside click
   useEffect(() => {
     const handleClickOutside = () => {
       if (showLogout) setShowLogout(false);

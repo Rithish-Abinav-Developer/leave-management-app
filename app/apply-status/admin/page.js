@@ -28,6 +28,7 @@ const { data: applications = [], isLoading, refetch } = useQuery({
   queryKey: ["adminApplications", adminName],
   queryFn: async () => {
     const res = await axios.get(`/api/applications?admin=${adminName}`);
+    console.log(res.data || []);
     return res.data.userApplications || [];
   },
   enabled: !!adminName && isClient,
@@ -87,13 +88,12 @@ const { data: applications = [], isLoading, refetch } = useQuery({
                         : `Permission for ${application.hours==="0.5"?"half an":application.hours} hr`}
 
                     </p>
-            <p id="date">
-  {application.type === "Leave"
-    ? `${new Date(application.date).toLocaleDateString("en-GB")} to ${new Date(
-        application.toDate
-      ).toLocaleDateString("en-GB")}`
-    : `${new Date(application.date).toLocaleDateString("en-GB")} - ${application.time}`}
+           <p id="date">
+  {application.type === "Leave" && application.toDate
+    ? `${new Date(application.date).toLocaleDateString("en-GB")} to ${new Date(application.toDate).toLocaleDateString("en-GB")}`
+    : new Date(application.date).toLocaleDateString("en-GB")}
 </p>
+
 
                     {application.fileUrl && (
                       <a
@@ -146,15 +146,12 @@ const { data: applications = [], isLoading, refetch } = useQuery({
                         ? application.leaveType
                         : "Permission"}
                     </p>
-                    <p id="date">
-                      {application.type === "Leave"
-                        ? `${new Date(
-                            application.date
-                          ).toLocaleDateString("en-GB")} to ${new Date(
-                            application.toDate
-                          ).toLocaleDateString("en-GB")}`
-                        : new Date(application.date).toLocaleDateString("en-GB")}
-                    </p>
+                   <p id="date">
+  {application.type === "Leave" && application.toDate
+    ? `${new Date(application.date).toLocaleDateString("en-GB")} to ${new Date(application.toDate).toLocaleDateString("en-GB")}`
+    : new Date(application.date).toLocaleDateString("en-GB")}
+</p>
+
                     {application.fileUrl && (
                       <a
                         id="medical_certificate"

@@ -15,7 +15,7 @@ export default function EmployeeStatusPage() {
     if (storedUser.name) setUsername(storedUser.name);
   }, []);
 
-  // Reset employee notification
+
   useEffect(() => {
     if (!username) return;
     axios.put(`/api/login/update-status/${username}`, { hasSeen: 0 })

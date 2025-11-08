@@ -861,6 +861,18 @@ display: none;
   color: red !important;
 }
 
+.date_container{
+  display: flex;
+  gap: 4px;
+}
+
+.date_container .period_select{
+  width: 150px !important;
+}
+
+.date_container .react-datepicker-wrapper{
+  width: 100%;
+}
 
 @media screen and (min-width:767px) {
   body{

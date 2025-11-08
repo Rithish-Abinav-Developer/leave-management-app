@@ -30,6 +30,8 @@ export default function Page() {
     leaveType: "",
     date: "",
     toDate: "",
+    fromPeriod: 0,
+    toPeriod: 0,  
     time: "",
     hours: "",
     period: "",
@@ -74,7 +76,6 @@ const handleChange = (e) => {
   console.log(name)
 
  if (name === "leaveType") {
-  console.log("Leave type changed to:", value);
   setFormData((prev) => ({
     ...prev,
     leaveType: value,
@@ -136,11 +137,11 @@ const handleSubmit = async (e) => {
       setLoading(false);
       return;
     }
-    if (!formData.toDate) {
-      alert("⚠️ Please select To Date.");
-      setLoading(false);
-      return;
-    }
+    // if (!formData.toDate) {
+    //   alert("⚠️ Please select To Date.");
+    //   setLoading(false);
+    //   return;
+    // }
     if (!formData.reason.trim()) {
       alert("⚠️ Please enter the reason for leave.");
       setLoading(false);
@@ -223,6 +224,44 @@ setFormData({
 };
 
 
+
+const calculateTotalPeriod = (fromDateStr, toDateStr, fromP, toP) => {
+  if (!fromDateStr) return 0;
+
+  const fromDate = new Date(`${fromDateStr}T00:00:00`);
+  const toDate = toDateStr ? new Date(`${toDateStr}T00:00:00`) : fromDate;
+
+  let workingDays = 0;
+  let iter = new Date(fromDate);
+
+  let weekendBetween = false;
+  let publicHolidayBetween = false;
+
+  while (iter <= toDate) {
+    const iso = iter.toISOString().split("T")[0];
+    const day = iter.getDay();
+
+    const isWeekend = day === 0 || day === 6;
+    const isPublicHoliday = leavesDates.includes(iso);
+
+    if (isWeekend) weekendBetween = true;
+    if (isPublicHoliday) publicHolidayBetween = true;
+
+    if (!isWeekend && !isPublicHoliday) workingDays++;
+
+    iter.setDate(iter.getDate() + 1);
+  }
+
+
+  let extraDays = 0;
+  if (weekendBetween) extraDays += 1;
+  if (publicHolidayBetween) extraDays += 1;
+
+  return workingDays - (1 - fromP) - (1 - toP) + extraDays;
+};
+
+
+
   // if (isLoading) return <p>Loading user info...</p>;
 
 
@@ -286,117 +325,26 @@ setFormData({
   <label>
     {formData.type === "Permission" ? "Select Date" : "Select From Date:"}
   </label>
-  <DatePicker
-    selected={formData.date ? new Date(formData.date) : null}
-    onChange={(date) =>
-      setFormData((prev) => ({
-        ...prev,
-        date: date ? date.toLocaleDateString("en-CA") : "",
-      }))
-    }
-    minDate={formData.leaveType === "Sick Leave" ? null : new Date()}
-maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
-
-    dateFormat="yyyy-MM-dd"
-    placeholderText="Select date"
-    className="date-picker"
-    filterDate={(date) => {
-      const day = date.getDay();
-      const formatted = date.toISOString().split("T")[0];
-      // Disable weekends & festival dates
-      return day !== 0 && day !== 6 && !leavesDates.includes(formatted);
-    }}
-  />
-</div>
-
-{formData.type === "Leave" && (
-  <div className="form-group">
-    <label>Select To Date</label>
+ <div className="date_container">
     <DatePicker
-      selected={formData.toDate ? new Date(formData.toDate) : null}
-    onChange={(date) => {
-  if (!date) return;
+      selected={formData.date ? new Date(formData.date) : null}
+      onChange={(date) => {
+        if (!date) return;
+        const formatted = date.toLocaleDateString("en-CA");
 
-  const formatted = date.toISOString().split("T")[0];
-  const day = date.getDay();
-
-  // Prevent selecting a weekend or public holiday as the endpoint (you already do this elsewhere)
-  if (day === 0 || day === 6 || leavesDates.includes(formatted)) {
-    alert("⚠️ Selected date is a holiday or weekend. Please choose another date.");
-    return;
-  }
-
-  if (!formData.date) {
-    alert("Please select From Date first.");
-    return;
-  }
-
-const fromDate = new Date(`${formData.date}T00:00:00`);
-const toDate = new Date(`${date.toLocaleDateString("en-CA")}T00:00:00`);
-
-if (toDate.getTime() < fromDate.getTime()) {
-  alert("⚠️ To Date cannot be before From Date.");
-  return;
-}
-
-
-  // Count working days (days that are NOT weekend and NOT in leavesDates)
-  let workingDays = 0;
-  let weekendFound = false;
-  let publicHolidayFound = false;
-
-  const iter = new Date(fromDate);
-  while (iter <= toDate) {
-    const iso = iter.toISOString().split("T")[0];
-    const d = iter.getDay();
-
-    const isWeekend = d === 0 || d === 6;
-    const isPublicHoliday = leavesDates.includes(iso);
-
-    if (isPublicHoliday) {
-      publicHolidayFound = true;
-    } else if (isWeekend) {
-      weekendFound = true;
-    } else {
-      // it's a working day
-      workingDays++;
-    }
-
-    iter.setDate(iter.getDate() + 1);
-  }
-
-  // Extra days rule:
-  // +1 if any weekend exists between, +1 if any public holiday exists between
-  let extraDays = 0;
-  if (weekendFound) extraDays += 1;
-  if (publicHolidayFound) extraDays += 1;
-
-  const finalDays = workingDays + extraDays;
-console.log(date.toLocaleDateString("en-CA"))
-  // Update state
-  setFormData((prev) => ({
-    ...prev,
-    toDate: date ? date.toLocaleDateString("en-CA") : "",
-    period: String(finalDays),
-  }));
-  setIsPeriodLocked(extraDays > 0);
-
-  // Inform the user if extras applied
-  if (extraDays > 0) {
-    const parts = [];
-    if (publicHolidayFound) parts.push("public holiday");
-    if (weekendFound) parts.push("weekend");
-    alert(`⚠️ Detected ${parts.join(" and ")} between the dates. Added ${extraDays} extra day(s). Total counted: ${finalDays} day(s).`);
-  }
-}}
-
-
-
-      minDate={formData.date ? new Date(formData.date) : new Date()}
-maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
-
+        setFormData((prev) => ({
+          ...prev,
+          date: formatted,
+          toDate: "",
+          fromPeriod: 1,
+          toPeriod: 1,
+          period: 1,
+        }));
+      }}
+      minDate={formData.leaveType === "Sick Leave" ? null : new Date()}
+      maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
       dateFormat="yyyy-MM-dd"
-      placeholderText="Select to date"
+      placeholderText="Select from date"
       className="date-picker"
       filterDate={(date) => {
         const day = date.getDay();
@@ -404,8 +352,120 @@ maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
         return day !== 0 && day !== 6 && !leavesDates.includes(formatted);
       }}
     />
+    <select className="period_select"
+      name="fromPeriod"
+      value={formData.fromPeriod}
+      onChange={(e) => {
+        const newFrom = Number(e.target.value);
+        const totalPeriod = calculateTotalPeriod(
+          formData.date,
+          formData.toDate,
+          newFrom,
+          formData.toPeriod
+        );
+        setFormData((prev) => ({ ...prev, fromPeriod: newFrom, period: Number(totalPeriod) }));
+      }}
+    >
+      <option value={1}>Full Day</option>
+      <option value={0.5}>Half Day</option>
+    </select>
+  </div>
+</div>
+
+
+{formData.type === "Leave" && (
+  <div className="form-group">
+    <label>Select To Date</label>
+  <div className="date_container">
+      <DatePicker
+        selected={formData.toDate ? new Date(formData.toDate) : null}
+        onChange={(date) => {
+          if (!date) return;
+          if (!formData.date) {
+            alert("Please select From Date first.");
+            return;
+          }
+
+          const fromDate = new Date(`${formData.date}T00:00:00`);
+          const toDate = new Date(`${date.toLocaleDateString("en-CA")}T00:00:00`);
+          if (toDate.getTime() < fromDate.getTime()) {
+            alert("⚠️ To Date cannot be before From Date.");
+            return;
+          }
+
+     
+
+          const totalPeriod = calculateTotalPeriod(
+            formData.date,
+            date.toLocaleDateString("en-CA"),
+            formData.fromPeriod,
+            formData.toPeriod
+          );
+
+               let weekendBetween = false;
+let publicHolidayBetween = false;
+let iter = new Date(fromDate);
+
+while (iter <= toDate) {
+  const iso = iter.toISOString().split("T")[0];
+  const day = iter.getDay();
+  if (day === 0 || day === 6) weekendBetween = true;
+  if (leavesDates.includes(iso)) publicHolidayBetween = true;
+  iter.setDate(iter.getDate() + 1);
+}
+
+if (weekendBetween || publicHolidayBetween) {
+  const parts = [];
+  if (weekendBetween) parts.push("weekend");
+  if (publicHolidayBetween) parts.push("public holiday");
+  const extraDays = (weekendBetween ? 1 : 0) + (publicHolidayBetween ? 1 : 0);
+  alert(`⚠️ Detected ${parts.join(" and ")} between the dates. Added ${extraDays} extra day(s). Total counted: ${totalPeriod} day(s).`);
+}
+
+          
+
+          setFormData((prev) => ({
+            ...prev,
+            toDate: date.toLocaleDateString("en-CA"),
+            period: Number(totalPeriod),
+          }));
+        }}
+        minDate={
+          formData.date
+            ? new Date(new Date(formData.date).setDate(new Date(formData.date).getDate() + 1))
+            : new Date()
+        }
+        maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
+        dateFormat="yyyy-MM-dd"
+        placeholderText="Select to date"
+        className="date-picker"
+        filterDate={(date) => {
+          const day = date.getDay();
+          const formatted = date.toISOString().split("T")[0];
+          return day !== 0 && day !== 6 && !leavesDates.includes(formatted);
+        }}
+      />
+      <select className="period_select"
+        name="toPeriod"
+        value={formData.toPeriod}
+        onChange={(e) => {
+          const newTo = Number(e.target.value);
+          const totalPeriod = calculateTotalPeriod(
+            formData.date,
+            formData.toDate,
+            formData.fromPeriod,
+            newTo
+          );
+          setFormData((prev) => ({ ...prev, toPeriod: newTo, period: Number(totalPeriod) }));
+        }}
+      >
+        <option value={1}>Full Day</option>
+        <option value={0.5}>Half Day</option>
+      </select>
+    </div>
   </div>
 )}
+
 
 
 
@@ -461,7 +521,7 @@ maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
     <select
       name="period"
       value={formData.period || ""}
-      disabled // always disabled
+      disabled 
     >
       {formData.period ? (
         <option value={formData.period}>

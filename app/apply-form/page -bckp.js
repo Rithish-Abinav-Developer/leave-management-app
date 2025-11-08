@@ -1,15 +1,22 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "../components/Loader";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { setHours, setMinutes } from "date-fns"; 
+import leavesDates from "./leavesDates.js";
+
 
 export default function Page() {
 
   const [loading, setLoading] = useState(false);
-  
+  const [isPeriodLocked, setIsPeriodLocked] = useState(false);
+
+  const [user, setUser] = useState(null);
 
 
   const [formData, setFormData] = useState({
@@ -17,6 +24,8 @@ export default function Page() {
     name: "",
     email: "",
     role: "",
+    division:"",
+    admin:"",
     type: "Leave",
     leaveType: "",
     date: "",
@@ -29,14 +38,22 @@ export default function Page() {
     status: "Pending",
   });
 
-  const { data: user, isLoading, isError } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => {
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) throw new Error("No user found");
-      return JSON.parse(storedUser);
-    },
-  });
+  // const { data: user, isLoading, isError } = useQuery({
+  //   queryKey: ["user"],
+  //   queryFn: async () => {
+  //     const storedUser = localStorage.getItem("user");
+  //     if (!storedUser) throw new Error("No user found");
+  //     return JSON.parse(storedUser);
+  //   },
+  // });
+
+  useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    setUser(JSON.parse(storedUser));
+  }
+  setLoading(false);
+}, []);
 
   React.useEffect(() => {
     if (user) {
@@ -45,6 +62,8 @@ export default function Page() {
         name: user.name || "",
         email: user.email || "",
         role: user.role || "",
+        admin: user.admin || "",
+        division: user.division || "",
         userId: user.id || "",
       }));
     }
@@ -52,6 +71,19 @@ export default function Page() {
 
 const handleChange = (e) => {
   const { name, value, type, files } = e.target;
+  console.log(name)
+
+ if (name === "leaveType") {
+  setFormData((prev) => ({
+    ...prev,
+    leaveType: value,
+    date: "",
+    toDate: "",
+    period: "",
+  }));
+  return;
+}
+
 
   if (name === "type") {
     setFormData((prev) => ({
@@ -78,7 +110,64 @@ const handleChange = (e) => {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
+  
+  if (!user) {
+    alert("User not loaded yet. Please wait a moment.");
+    return;
+  }
   setLoading(true);
+
+  if (formData.type === "Leave") {
+    if (!formData.leaveType) {
+      alert("⚠️ Please select a leave type.");
+      setLoading(false);
+      return;
+    }
+    if(formData.leaveType === "Sick Leave"){
+      if (!formData.file || formData.file===null) {
+        alert("⚠️ Please upload a medical certificate.");
+        setLoading(false);
+        return;
+      }
+    }
+    if (!formData.date) {
+      alert("⚠️ Please select From Date.");
+      setLoading(false);
+      return;
+    }
+    // if (!formData.toDate) {
+    //   alert("⚠️ Please select To Date.");
+    //   setLoading(false);
+    //   return;
+    // }
+    if (!formData.reason.trim()) {
+      alert("⚠️ Please enter the reason for leave.");
+      setLoading(false);
+      return;
+    }
+  } else if (formData.type === "Permission") {
+    if (!formData.date) {
+      alert("⚠️ Please select a Date.");
+      setLoading(false);
+      return;
+    }
+    if (!formData.time) {
+      alert("⚠️ Please select a Time.");
+      setLoading(false);
+      return;
+    }
+    if (!formData.hours) {
+      alert("⚠️ Please select Hours of permission.");
+      setLoading(false);
+      return;
+    }
+    if (!formData.reason.trim()) {
+      alert("⚠️ Please enter the reason for permission.");
+      setLoading(false);
+      return;
+    }
+  }
+
 
   const data = new FormData();
 
@@ -99,10 +188,31 @@ const handleSubmit = async (e) => {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
-    await axios.post("/api/admin-notification", {});
+    // await axios.post("/api/admin-notification", {});
+    
 
     alert("Form submitted successfully!");
-    setFormData(prev => ({ ...Object.fromEntries(Object.keys(prev).map(k => [k, ""])), type: "Leave", file: null }));
+const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+
+setFormData({
+  name: storedUser?.name || "",
+  email: storedUser?.email || "",
+  role: storedUser?.role || "",
+  division: storedUser?.division || "",
+  admin: storedUser?.admin || "",
+  userId: storedUser?.id || "",
+  type: "Leave",
+  leaveType: "",
+  date: "",
+  toDate: "",
+  time: "",
+  hours: "",
+  period: "",
+  reason: "",
+  file: null,
+  status: "Pending",
+});
+ await axios.put(`/api/login/update-status/${storedUser?.admin}`, { increment: true });
     setLoading(false);
   } catch (error) {
     console.error("Error submitting:", error);
@@ -113,11 +223,11 @@ const handleSubmit = async (e) => {
 
 
   // if (isLoading) return <p>Loading user info...</p>;
-  if (isError) return <p>Error loading user info.</p>;
+
 
   return (
     <div className="apply_page">
-      {isLoading || loading && <Loader />}
+      { loading && <Loader />}
       <Header pageTitle={'Apply Form'} />
 
       <div className="container">
@@ -170,40 +280,164 @@ const handleSubmit = async (e) => {
             </div>
           )}
 
-          <div className="form-group">
-            <label>{formData.type === "Permission"?"Select Date":"Select From Date:"}</label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-            />
-          </div>
+     
+<div className="form-group">
+  <label>
+    {formData.type === "Permission" ? "Select Date" : "Select From Date:"}
+  </label>
+  <DatePicker
+    selected={formData.date ? new Date(formData.date) : null}
+    onChange={(date) =>
+      setFormData((prev) => ({
+        ...prev,
+        date: date ? date.toLocaleDateString("en-CA") : "",
+        toDate:'',
+        period:1
+      }))
+    }
+    minDate={formData.leaveType === "Sick Leave" ? null : new Date()}
+maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
+
+    dateFormat="yyyy-MM-dd"
+    placeholderText="Select date"
+    className="date-picker"
+    filterDate={(date) => {
+      const day = date.getDay();
+      const formatted = date.toISOString().split("T")[0];
+      // Disable weekends & festival dates
+      return day !== 0 && day !== 6 && !leavesDates.includes(formatted);
+    }}
+  />
+</div>
 
 {formData.type === "Leave" && (
-              <div className="form-group">
-            <label>Select To Date</label>
-            <input
-              type="date"
-              name="toDate"
-              value={formData.toDate}
-              onChange={handleChange}
-              required
-            />
-          </div>
+  <div className="form-group">
+    <label>Select To Date</label>
+    <DatePicker
+      selected={formData.toDate ? new Date(formData.toDate) : null}
+    onChange={(date) => {
+  if (!date) return;
+
+  const formatted = date.toISOString().split("T")[0];
+  const day = date.getDay();
+
+  if (day === 0 || day === 6 || leavesDates.includes(formatted)) {
+    alert("⚠️ Selected date is a holiday or weekend. Please choose another date.");
+    return;
+  }
+
+  if (!formData.date) {
+    alert("Please select From Date first.");
+    return;
+  }
+
+const fromDate = new Date(`${formData.date}T00:00:00`);
+const toDate = new Date(`${date.toLocaleDateString("en-CA")}T00:00:00`);
+
+if (toDate.getTime() < fromDate.getTime()) {
+  alert("⚠️ To Date cannot be before From Date.");
+  return;
+}
+
+
+  let workingDays = 0;
+  let weekendFound = false;
+  let publicHolidayFound = false;
+
+  const iter = new Date(fromDate);
+  while (iter <= toDate) {
+    const iso = iter.toISOString().split("T")[0];
+    const d = iter.getDay();
+
+    const isWeekend = d === 0 || d === 6;
+    const isPublicHoliday = leavesDates.includes(iso);
+
+    if (isPublicHoliday) {
+      publicHolidayFound = true;
+    } else if (isWeekend) {
+      weekendFound = true;
+    } else {
+      workingDays++;
+    }
+
+    iter.setDate(iter.getDate() + 1);
+  }
+
+ 
+  let extraDays = 0;
+  if (weekendFound) extraDays += 1;
+  if (publicHolidayFound) extraDays += 1;
+
+  const finalDays = workingDays + extraDays;
+console.log(date.toLocaleDateString("en-CA"))
+  
+  setFormData((prev) => ({
+    ...prev,
+    toDate: date ? date.toLocaleDateString("en-CA") : "",
+    period: String(finalDays),
+  }));
+  setIsPeriodLocked(extraDays > 0);
+
+
+  if (extraDays > 0) {
+    const parts = [];
+    if (publicHolidayFound) parts.push("public holiday");
+    if (weekendFound) parts.push("weekend");
+    alert(`⚠️ Detected ${parts.join(" and ")} between the dates. Added ${extraDays} extra day(s). Total counted: ${finalDays} day(s).`);
+  }
+}}
+
+
+
+     minDate={
+  formData.date 
+    ? new Date(new Date(formData.date).setDate(new Date(formData.date).getDate() + 1)) 
+    : new Date()
+}
+maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
+
+      dateFormat="yyyy-MM-dd"
+      placeholderText="Select to date"
+      className="date-picker"
+      filterDate={(date) => {
+        const day = date.getDay();
+        const formatted = date.toISOString().split("T")[0];
+        return day !== 0 && day !== 6 && !leavesDates.includes(formatted);
+      }}
+    />
+  </div>
 )}
+
+
 
           {formData.type === "Permission" && (
             <>
               <div className="form-group">
                 <label>Select Time:</label>
-                <input
-                  type="time"
-                  name="time"
-                  value={formData.time}
-                  onChange={handleChange}
-                />
+<DatePicker
+  selected={
+    formData.time ? new Date(`1970-01-01T${formData.time}:00`) : null
+  }
+  onChange={(time) => {
+    if (time) {
+      const hours = String(time.getHours()).padStart(2, "0");
+      const minutes = String(time.getMinutes()).padStart(2, "0");
+      setFormData((prev) => ({ ...prev, time: `${hours}:${minutes}` }));
+
+    }
+  }}
+  showTimeSelect
+  showTimeSelectOnly
+  timeIntervals={30}
+  timeCaption="Time"
+  dateFormat="h:mm aa" 
+  minTime={setHours(setMinutes(new Date(), 0), 9)} 
+ maxTime={setHours(setMinutes(new Date(), 30), 17)} 
+  placeholderText="Select time (9 AM - 5:30 PM)"
+/>
+
+
+
               </div>
 
               <div className="form-group">
@@ -222,23 +456,27 @@ const handleSubmit = async (e) => {
             </>
           )}
 
-          {formData.type === "Leave" && (
-            <div className="form-group">
-              <label>Select Period:</label>
-              <select
-                name="period"
-                value={formData.period}
-                onChange={handleChange}
-              >
-                <option>Period of leave...</option>
-                {[...Array(10)].map((_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {i + 1} Day{i > 0 ? "s" : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+     {formData.type === "Leave" && (
+  <div className="form-group">
+    <label>Period of Leave:</label>
+    <select
+      name="period"
+      value={formData.period || ""}
+      disabled 
+    >
+      {formData.period ? (
+        <option value={formData.period}>
+          {Number(formData.period)} Day{Number(formData.period) > 1 ? "s" : ""} (Auto Calculated)
+        </option>
+      ) : (
+        <option>Auto calculated from dates...</option>
+      )}
+    </select>
+  </div>
+)}
+
+
+
 
           <div className="form-group">
             <label>Reason:</label>

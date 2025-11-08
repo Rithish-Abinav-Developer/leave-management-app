@@ -31,7 +31,6 @@ const [loading, setLoading] = useState(false);
   console.log(res.data);
   return res.data;
 } catch (error) {
-  // rethrow so React Query onError still runs
   throw error;
 }
     },

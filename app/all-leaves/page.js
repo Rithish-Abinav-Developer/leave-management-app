@@ -46,7 +46,7 @@ useEffect(() => {
       const res = await axios.get(`/api/applications?admin=${adminName}`);
       return res.data.userApplications || [];
     },
-    enabled: !!adminName && isClient, // only fetch when adminName is available
+    enabled: !!adminName && isClient,
   });
 
 
@@ -59,14 +59,14 @@ useEffect(() => {
   //   },
   // });
 
-  // Function to export selected data
+
   const exportToExcel = () => {
     if (!allApplications || allApplications.length === 0) {
       alert("No data to export");
       return;
     }
 
-    // Select only specific fields
+   
 const exportData = allApplications.map((a) => ({
   Name: a.name,
   Type: a.type === "Leave" ? a.leaveType : "Permission",
@@ -83,20 +83,17 @@ const exportData = allApplications.map((a) => ({
 }));
 
 
-    // Convert JSON to worksheet
+   
     const worksheet = XLSX.utils.json_to_sheet(exportData);
 
-    // Create a new workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Leave Applications");
 
-    // Generate Excel buffer
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
     });
 
-    // Save file
     const blob = new Blob([excelBuffer], {
       type: "application/octet-stream",
     });
@@ -145,12 +142,10 @@ const exportData = allApplications.map((a) => ({
                         : `Permission for ${application.hours==="0.5"?"half an":application.hours} hr`}
 
                     </p>
-                    <p id="date">
-  {application.type === "Leave"
-    ? `${new Date(application.date).toLocaleDateString("en-GB")} to ${new Date(
-        application.toDate
-      ).toLocaleDateString("en-GB")}`
-    : `${new Date(application.date).toLocaleDateString("en-GB")} - ${application.time}`}
+                         <p id="date">
+  {application.type === "Leave" && application.toDate
+    ? `${new Date(application.date).toLocaleDateString("en-GB")} to ${new Date(application.toDate).toLocaleDateString("en-GB")}`
+    : new Date(application.date).toLocaleDateString("en-GB")}
 </p>
 
                     <p id="reason">{application.reason}</p>

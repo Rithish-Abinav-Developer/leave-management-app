@@ -96,9 +96,9 @@ const { data: Application, isLoading: applicationLoading } = useQuery({
 });
 
 const casualLeave = Application?.filter(item => item.leaveType === "Casual Leave" && item.status === "Approved") || [];
+const totalCasualLeaveDays = casualLeave.reduce((sum, item) => sum + (item.period || 0), 0);
+
 const sickLeave = Application?.filter(item => item.leaveType === "Sick Leave" && item.status === "Approved") || [];
-const marriageLeave = Application?.filter(item => item.leaveType === "Marriage Leave" && item.status === "Approved") || [];
-const maternityLeave = Application?.filter(item => item.leaveType === "Maternity Leave" && item.status === "Approved") || [];
 const permission = Application?.filter(item => item.type === "Permission" && item.status === "Approved" ) || 0;
 
 
@@ -162,7 +162,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
         <div>
 <Image src={casualLeaveIcon} alt="casual-leave-icon" width={35} height={35} />
 <span>
-    <p className={`${casualLeave?.length> 12 ? "warning" : ""}`}>{casualLeave?.length || 0}</p>/<p>12</p>
+    <p className={`${casualLeave?.length> 12 ? "warning" : ""}`}>{totalCasualLeaveDays || 0}</p>/<p>12</p>
 </span>
         </div>
         <p>Casual Leave</p>

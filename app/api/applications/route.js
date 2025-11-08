@@ -29,6 +29,8 @@ export async function POST(req) {
     const type = formData.get("type");
     const leaveType = formData.get("leaveType");
     const date = formData.get("date");
+    const fromPeriod = formData.get("fromPeriod");
+    const toPeriod = formData.get("toPeriod");
     const time = formData.get("time");
     const hours = formData.get("hours");
     const period = formData.get("period");
@@ -69,6 +71,8 @@ export async function POST(req) {
       type,
       leaveType,
       date,
+      fromPeriod,
+      toPeriod,
       time,
       hours,
       period,
@@ -95,61 +99,85 @@ export async function POST(req) {
     const approveLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/approve?id=${application._id}`;
     const rejectLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/applications/reject?id=${application._id}`;
 
-    const html = `
-      <div style="font-family: Arial, sans-serif; background: #f7f9fc; padding: 20px;">
-        <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-          <h2 style="color: #2c3e50;">New Leave Application Received</h2>
+  const html = `
+<div style="font-family: Arial, sans-serif; background: #f7f9fc; padding: 20px;">
+  <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 style="color: #2c3e50;">
+      ${type === "Leave" ? "New Leave Application Received" : "New Permission Request Received"}
+    </h2>
 
-          <p style="font-size: 15px;">Dear ${admin},</p>
-          <p style="font-size: 15px;">An employee <strong>${name}</strong> has submitted a new <strong>${leaveType}</strong> application. Please review the details below:</p>
+    <p style="font-size: 15px;">Dear ${admin},</p>
+    <p style="font-size: 15px;">
+      Employee <strong>${name}</strong> has submitted a new <strong>${type}</strong> application.
+      Please review the details below:
+    </p>
 
-          <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Employee Name</td><td style="padding: 8px; border: 1px solid #ddd;">${name}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Email</td><td style="padding: 8px; border: 1px solid #ddd;">${email}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Role</td><td style="padding: 8px; border: 1px solid #ddd;">${role}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Division</td><td style="padding: 8px; border: 1px solid #ddd;">${division}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Leave Type</td><td style="padding: 8px; border: 1px solid #ddd;">${leaveType}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">From</td><td style="padding: 8px; border: 1px solid #ddd;">${date}</td></tr>
-            ${toDate ? `<tr><td style="padding: 8px; border: 1px solid #ddd;">To</td><td style="padding: 8px; border: 1px solid #ddd;">${toDate}</td></tr>` : ""}
-            ${time ? `<tr><td style="padding: 8px; border: 1px solid #ddd;">Time</td><td style="padding: 8px; border: 1px solid #ddd;">${time}</td></tr>` : ""}
-            ${hours ? `<tr><td style="padding: 8px; border: 1px solid #ddd;">Duration</td><td style="padding: 8px; border: 1px solid #ddd;">${hours} hour(s)</td></tr>` : ""}
-            ${period ? `<tr><td style="padding: 8px; border: 1px solid #ddd;">Period</td><td style="padding: 8px; border: 1px solid #ddd;">${period}</td></tr>` : ""}
-            <tr><td style="padding: 8px; border: 1px solid #ddd;">Reason</td><td style="padding: 8px; border: 1px solid #ddd;">${reason}</td></tr>
-          </table>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">Employee Name</td><td style="padding: 8px; border: 1px solid #ddd;">${name}</td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">Email</td><td style="padding: 8px; border: 1px solid #ddd;">${email}</td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">Role</td><td style="padding: 8px; border: 1px solid #ddd;">${role}</td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">Division</td><td style="padding: 8px; border: 1px solid #ddd;">${division}</td></tr>
 
-          ${fileUrl ? `
-          <p style="margin-top: 16px;">
-            📎 <a href="${fileUrl}" target="_blank" style="color: #2980b9; text-decoration: none;">View Attached Document</a>
-          </p>` : ""}
+      ${
+        type === "Leave"
+          ? `
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">Leave Type</td><td style="padding: 8px; border: 1px solid #ddd;">${leaveType}</td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">From</td><td style="padding: 8px; border: 1px solid #ddd;">
+        ${date}${fromPeriod == 0.5 ? " (Half Day)" : ""}
+      </td></tr>
+      ${
+        toDate
+          ? `<tr><td style="padding: 8px; border: 1px solid #ddd;">To</td><td style="padding: 8px; border: 1px solid #ddd;">
+            ${toDate}${toPeriod == 0.5 ? " (Half Day)" : ""}
+          </td></tr>`
+          : ""
+      }
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">Period</td><td style="padding: 8px; border: 1px solid #ddd;">${period} Day(s)</td></tr>
+      `
+          : `
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">Date</td><td style="padding: 8px; border: 1px solid #ddd;">${date}</td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">Time</td><td style="padding: 8px; border: 1px solid #ddd;">${time}</td></tr>
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">Hours</td><td style="padding: 8px; border: 1px solid #ddd;">${hours}</td></tr>
+      `
+      }
 
-          <div style="margin-top: 24px; text-align: center;">
-            <a href="${approveLink}" 
-              style="display: inline-block; background-color: #27ae60; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-right: 10px; font-weight: bold;">
-              ✅ Approve
-            </a>
-            <a href="${rejectLink}" 
-              style="display: inline-block; background-color: #e74c3c; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
-              ❌ Reject
-            </a>
-          </div>
+      <tr><td style="padding: 8px; border: 1px solid #ddd;">Reason</td><td style="padding: 8px; border: 1px solid #ddd;">${reason}</td></tr>
+    </table>
 
-          <p style="margin-top: 24px; font-size: 13px; color: #7f8c8d; text-align: center;">
-            This is an automated message from the Leave Management System.
-          </p>
-        </div>
-      </div>
-    `;
+    ${
+      fileUrl
+        ? `<p style="margin-top: 16px;">📎 <a href="${fileUrl}" target="_blank" style="color: #2980b9; text-decoration: none;">View Attached Document</a></p>`
+        : ""
+    }
+
+    <div style="margin-top: 24px; text-align: center;">
+      <a href="${approveLink}" 
+        style="display: inline-block; background-color: #27ae60; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-right: 10px; font-weight: bold;">
+        ✅ Approve
+      </a>
+      <a href="${rejectLink}" 
+        style="display: inline-block; background-color: #e74c3c; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+        ❌ Reject
+      </a>
+    </div>
+
+    <p style="margin-top: 24px; font-size: 13px; color: #7f8c8d; text-align: center;">
+      This is an automated message from the Leave Management System.
+    </p>
+  </div>
+</div>
+`;
 
 
-    // await axios.post(
-    //   `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-mail`,
-    //   {
-    //     // to: applicationAdmin[0].email,
-    //     to:'amuthathulasi1302@gmail.com',
-    //     subject,
-    //     html,
-    //   }
-    // );
+
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-mail`,
+      {
+        to: applicationAdmin[0].email,
+        subject,
+        html,
+      }
+    );
 
     return NextResponse.json({
       success: true,

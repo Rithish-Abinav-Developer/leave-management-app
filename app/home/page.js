@@ -60,7 +60,7 @@ const handleFileChange = async (e) => {
     setProfileImage(res.data.url);
     setLoading(false);
   } catch (err) {
-    console.error("❌ Upload failed:", err);
+    console.error("Upload failed:", err);
     setLoading(false);
   }
 };
@@ -74,6 +74,15 @@ const handleFileChange = async (e) => {
     setProfileImage(user.profileImage);
   }
 },[])
+
+
+const { data: announcement, isLoading: announcementLoading } = useQuery({
+  queryKey: ["announcement"],
+  queryFn: async () => {
+    const res = await axios.get("/api/announcement");
+    return res.data;
+  },
+});
 
 
   
@@ -99,7 +108,16 @@ const casualLeave = Application?.filter(item => item.leaveType === "Casual Leave
 const totalCasualLeaveDays = casualLeave.reduce((sum, item) => sum + (item.period || 0), 0);
 
 const sickLeave = Application?.filter(item => item.leaveType === "Sick Leave" && item.status === "Approved") || [];
-const permission = Application?.filter(item => item.type === "Permission" && item.status === "Approved" ) || 0;
+// const permission = Application?.filter(item => item.type === "Permission" && item.status === "Approved" ) || 0;
+const permission = Application?.filter((item) => {
+  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+  const itemMonth = new Date(item.date).toLocaleString('default', { month: 'long' });
+
+  console.log(itemMonth);
+
+  return itemMonth === currentMonth && item.status === "Approved" || 0 ; 
+});
+
 
 
 const {data:TodayLeave, isLoading:todayLeaveLoading} = useQuery({
@@ -112,21 +130,27 @@ const {data:TodayLeave, isLoading:todayLeaveLoading} = useQuery({
 });
 
 
-const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
+// for employee
+const { data: RecentLeave, isLoading: recentLeaveLoading } = useQuery({
   queryKey: ["recentLeave"],
   queryFn: async () => {
-    const res = await axios.get(`/api/applications/${user.name}`);
-    // console.log(res.data.userApplications);
+    const res = await axios.get(`/api/applications/${user.name}`, {
+      params: {
+        role: user?.role || "",
+      },
+    });
     return res.data.userApplications;
   },
 });
+
+
 
   // if (userLoading) return <p>Loading...</p>;
 
   return (
     <div className="apply_page">
       {userLoading &&  <Loader/> }
-      {loading || todayLeaveLoading || recentLeaveLoading &&  <Loader/> }
+      {loading || todayLeaveLoading || recentLeaveLoading || applicationLoading &&  <Loader/> }
      
       <Header pageTitle="Home" />
 
@@ -257,12 +281,19 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
 
         <div className="announcements">
             <h4>Announcement & News</h4>
-            <p>We're celebrating the Festival of Lights tomorrow from 3:00 PM to 4:00 PM in the cafeteria. Join us for sweets, music, and fun activities!</p>
+            <p>
+             {announcementLoading
+  ? "Loading..."
+  : announcement?.text || "No announcement"}
+
+            </p>
         </div>
 
+
          <div className="top_sec">
-            <h3>Your Recent Leaves</h3>
-            <Link href="/apply-status/employee">
+          
+            <h3>{user?.role === "employee" ? "Your Recent Applications" : user?.role === "Manager" ? "Team Recent Applications" : "All Recent Applications"}</h3>
+            <Link href={`/apply-status/${user?.role === "employee" ? "employee" : user?.role === "Manager" ? "manager" : "admin"}`}>
           See more
             <Image src={rightArrow} alt="right-arrow" width={16} height={16} />
             </Link>
@@ -298,7 +329,7 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
         height={16}
       />
       <div>
-        <h5>{item.type==="Leave"?item.leaveType:`Permission for ${item.hours==="0.5"?"half an":item.hours} hr`}</h5>
+        <h5>{user?.role !== "employee" && item.name + " -"} {item.type==="Leave"?item.leaveType:`Permission for ${item.hours==="0.5"?"half an":item.hours} hr`}</h5>
         {item.toDate ? (
           <p className="date">
             {`${new Date(item.date).toLocaleDateString("en-GB")}`} to{" "}
@@ -320,6 +351,8 @@ const {data:RecentLeave, isLoading:recentLeaveLoading} = useQuery({
          
                  
         </div>
+
+
 
         <div className="party">
             <p>“Ride the waves of work and leisure, and surf <br/>your way to blissful balance”</p>

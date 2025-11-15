@@ -214,7 +214,7 @@ setFormData({
   file: null,
   status: "Pending",
 });
- await axios.put(`/api/login/update-status/${storedUser?.admin}`, { increment: true });
+ await axios.put(`/api/login/update-status/${storedUser?.admin}`, { increment: true, role: storedUser?.role || "" });
     setLoading(false);
   } catch (error) {
     console.error("Error submitting:", error);

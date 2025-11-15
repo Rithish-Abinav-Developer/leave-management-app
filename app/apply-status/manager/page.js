@@ -8,7 +8,7 @@ import Select from "react-select";
 import Loader from "@/app/components/Loader";
 
 export default function AdminApplicationsPage() {
-  const [adminName, setAdminName] = useState("");
+  const [managerName, setmanagerName] = useState("");
   const [isClient, setIsClient] = useState(false); 
   const [loading,setLoading] = useState(false);
 
@@ -17,7 +17,7 @@ useEffect(() => {
   const user = localStorage.getItem("user");
   if (user) {
     const parsed = JSON.parse(user);
-    setAdminName(parsed.name);
+    setmanagerName(parsed.name);
   }
   setIsClient(true); 
 }, []);
@@ -25,23 +25,23 @@ useEffect(() => {
 
  
 const { data: applications = [], isLoading, refetch } = useQuery({
-  queryKey: ["adminApplications", adminName],
+  queryKey: ["adminApplications", managerName],
   queryFn: async () => {
-    const res = await axios.get(`/api/applications`);
+    const res = await axios.get(`/api/applications?admin=${managerName}`);
     console.log(res.data || []);
     return res.data.userApplications || [];
   },
-  enabled: !!adminName && isClient,
+  enabled: !!managerName && isClient,
 });
 
 
   const { data: adminNotifications = [], isLoading: isLoadingNotifications} = useQuery({
     queryKey: ["adminNotifications"],
     queryFn: async () => {
-      const res = await axios.put(`/api/login/update-status/${ adminName }`, { hasSeen: 0 });
+      const res = await axios.put(`/api/login/update-status/${ managerName }`, { hasSeen: 0 });
       return res.data || [];
     },
-     enabled: isClient && !!adminName,  
+     enabled: isClient && !!managerName,  
   });
 
   if (!isClient) return null; 
@@ -57,7 +57,7 @@ const { data: applications = [], isLoading, refetch } = useQuery({
     setLoading(true);
     try {
       await axios.put(`/api/status/${id}`, { status });
-      await axios.put(`/api/login/update-status/${name}`, { increment: true });
+      await axios.put(`/api/login/update-status/${name}`, { increment: true,role:"Manager" });
       refetch();
     setLoading(false);
 

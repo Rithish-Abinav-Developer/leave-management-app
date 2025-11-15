@@ -6,7 +6,7 @@ export async function PUT(req, { params }) {
   try {
     const { name } = await params;
     const body = await req.json();
-    const { hasSeen, increment } = body;
+    const { hasSeen, increment,role } = body;
 
     await connectMongo();
     // console.log(name, hasSeen, increment);
@@ -23,6 +23,11 @@ export async function PUT(req, { params }) {
       new: true,
     });
 
+    if (role === "employee" ) {
+      await User.updateMany({ role: "admin" }, { $inc: { hasSeen: 1 } });
+    }
+
+    
     if (!updatedUser)
       return NextResponse.json(
         { success: false, message: "User not found" },

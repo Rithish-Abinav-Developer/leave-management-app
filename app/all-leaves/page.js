@@ -13,6 +13,7 @@ import Loader from "../components/Loader";
 export default function Page() {
 
  const [adminName, setAdminName] = useState("");
+ const [role,setRole] = useState("");
   const [isClient, setIsClient] = useState(false); 
   
   useEffect(() => {
@@ -20,6 +21,7 @@ export default function Page() {
     if (user) {
       const parsed = JSON.parse(user);
       setAdminName(parsed.name);
+      setRole(parsed.role);
     }
     setIsClient(true); 
   }, []);
@@ -40,14 +42,23 @@ useEffect(() => {
   
   
    
-  const { data: allApplications = [], isLoading, refetch } = useQuery({
-    queryKey: ["adminApplications", adminName],
-    queryFn: async () => {
-      const res = await axios.get(`/api/applications?admin=${adminName}`);
-      return res.data.userApplications || [];
-    },
-    enabled: !!adminName && isClient,
-  });
+ const { data: allApplications = [], isLoading, refetch } = useQuery({
+  queryKey: ["adminApplications", adminName],
+  queryFn: async () => {
+    
+    let res;
+
+    if (role === "Manager") {
+      res = await axios.get(`/api/applications?admin=${adminName}`);
+    } else {
+      res = await axios.get(`/api/applications`);
+    }
+
+    return res.data.userApplications || [];
+  },
+  enabled: !!adminName && !!role && isClient,
+});
+
 
 
   // const { data: allApplications, isLoading } = useQuery({

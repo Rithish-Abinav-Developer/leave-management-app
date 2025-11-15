@@ -13,6 +13,11 @@ html, body {
   overscroll-behavior: none;
 }
 
+body{
+  max-width: 450px;
+  margin: auto;
+}
+
 :root {
   --blue: #034EA1;
   --lightBlue :#BECDDD;
@@ -874,11 +879,6 @@ display: none;
   width: 100%;
 }
 
-@media screen and (min-width:767px) {
-  body{
-    display: none;
-  }
-}
 
 
 @supports (-webkit-touch-callout: none) {

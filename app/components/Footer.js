@@ -64,7 +64,7 @@ export default function Footer() {
             href={
               user?.role === "employee"
                 ? "/apply-status/employee"
-                : "/apply-status/admin"
+                :  user?.role === "Manager" ? "/apply-status/manager" : "/apply-status/admin"
             }
           >
             <Image src={StatusIcon} alt="Status" width={24} height={24} />

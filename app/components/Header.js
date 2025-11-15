@@ -87,6 +87,9 @@ useEffect(() => {
 
       if (userData.role === "admin") {
         router.push("/apply-status/admin");
+      }
+       else if (userData.role === "Manager") {
+        router.push("/apply-status/manager");
       } else {
         router.push("/apply-status/employee");
       }

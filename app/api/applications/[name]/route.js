@@ -4,16 +4,29 @@ import Application from "@/models/Application";
 
 export async function GET(req, { params }) {
   try {
-    const { name } = await params;              
-    // console.log("Requested name:", name);
-
+    const { name } = await params;
+    const { searchParams } = new URL(req.url);
+    const role = searchParams.get("role")?.toLowerCase();
+    
     await connectMongo();
 
-    const userApplications = await Application.find({ name });
+    let query = {};
+
+    if (role === "employee") {
+      query = name ? { name } : {};
+    }
+
+    if (role === "manager") {
+      query = name ? { admin: name } : {};
+    }
+
+   
+
+    const userApplications = await Application.find(query);
 
     if (!userApplications || userApplications.length === 0) {
       return NextResponse.json(
-        { success: false, message: "No applications found for this name" },
+        { success: false, message: "No applications found" },
         { status: 404 }
       );
     }
@@ -30,5 +43,3 @@ export async function GET(req, { params }) {
     );
   }
 }
-
-

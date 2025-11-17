@@ -342,7 +342,7 @@ const calculateTotalPeriod = (fromDateStr, toDateStr, fromP, toP) => {
           period: 1,
         }));
       }}
-      minDate={formData.leaveType === "Sick Leave" ? null : new Date()}
+      // minDate={formData.leaveType === "Sick Leave" ? null : new Date()}
       maxDate={formData.leaveType === "Sick Leave" ? new Date() : null}
       dateFormat="yyyy-MM-dd"
       placeholderText="Select from date"
@@ -358,6 +358,7 @@ const calculateTotalPeriod = (fromDateStr, toDateStr, fromP, toP) => {
     <select className="period_select"
       name="fromPeriod"
       value={formData.fromPeriod}
+      disabled={!formData.date}
       onChange={(e) => {
         const newFrom = Number(e.target.value);
         const totalPeriod = calculateTotalPeriod(
@@ -452,6 +453,7 @@ if (weekendBetween || publicHolidayBetween) {
       <select className="period_select"
         name="toPeriod"
         value={formData.toPeriod}
+        disabled={!formData.toDate}
         onChange={(e) => {
           const newTo = Number(e.target.value);
           const totalPeriod = calculateTotalPeriod(

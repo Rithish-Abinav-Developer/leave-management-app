@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const {from,replyTo, to, subject, html } = await req.json();
+    const { name, email, to, subject, html } = await req.json();
+
 
     if (!to || !subject || !html) {
       return NextResponse.json(
@@ -25,13 +26,14 @@ export async function POST(req) {
     });
 
     // Email options
-    const mailOptions = {
-      from,
-      replyTo,
-      to,
-      subject,
-      html,
-    };
+ const mailOptions = {
+  from: `"${name} via Leave Portal" <${process.env.EMAIL_USER}>`,
+  replyTo: email,
+  to,
+  subject,
+  html,
+};
+
 
     // Send the email
     await transporter.sendMail(mailOptions);

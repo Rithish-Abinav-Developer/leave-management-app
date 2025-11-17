@@ -118,7 +118,6 @@ export async function POST(req) {
     <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
       <tr><td style="padding: 8px; border: 1px solid #ddd;">Employee Name</td><td style="padding: 8px; border: 1px solid #ddd;">${name}</td></tr>
       <tr><td style="padding: 8px; border: 1px solid #ddd;">Email</td><td style="padding: 8px; border: 1px solid #ddd;">${email}</td></tr>
-      <tr><td style="padding: 8px; border: 1px solid #ddd;">Role</td><td style="padding: 8px; border: 1px solid #ddd;">${role}</td></tr>
       <tr><td style="padding: 8px; border: 1px solid #ddd;">Division</td><td style="padding: 8px; border: 1px solid #ddd;">${division}</td></tr>
 
       ${

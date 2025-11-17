@@ -315,8 +315,6 @@ const calculateTotalPeriod = (fromDateStr, toDateStr, fromP, toP) => {
                 <option>Choose leave type...</option>
                 <option value="Casual Leave">Casual Leave</option>
                 <option value="Sick Leave">Sick Leave</option>
-                <option value="Marriage Leave">Marriage Leave</option>
-                <option value="Maternity Leave">Maternity Leave</option>
               </select>
             </div>
           )}

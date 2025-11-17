@@ -29,8 +29,8 @@ export default function EmployeeStatusPage() {
       if (!username) return [];
       const res = await axios.get(`/api/applications/${username}{
   params: { role: "employee" },
-  console.log(res.data);
 }`);
+       console.log(res.data);
       return res.data.userApplications || [];
     },
     enabled: !!username,

@@ -27,7 +27,7 @@ export async function POST(req) {
 
     // Email options
  const mailOptions = {
-  from: `"${name} via Leave Portal" <${email}>`,
+  from: `"${name} via Leave Portal" <${process.env.EMAIL_USER}>`,
   replyTo: email,
   to,
   subject,

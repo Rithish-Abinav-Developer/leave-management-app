@@ -188,7 +188,7 @@ export async function POST(req) {
     return NextResponse.json({
       success: true,
       message: "Application saved, file uploaded, and email sent successfully!",
-      fileUrl,
+      fileUrl,applicationAdmin
     });
   } catch (err) {
     console.error("Error saving application:", err);

@@ -27,7 +27,9 @@ export default function EmployeeStatusPage() {
     queryKey: ["employeeApplications", username],
     queryFn: async () => {
       if (!username) return [];
-      const res = await axios.get(`/api/applications/${username}`);
+      const res = await axios.get(`/api/applications/${username}{
+  params: { role: "employee" },
+}`);
       return res.data.userApplications || [];
     },
     enabled: !!username,

@@ -146,11 +146,14 @@ const { data: applications = [], isLoading, refetch } = useQuery({
                         ? application.leaveType
                         : "Permission"}
                     </p>
-                   <p id="date">
-  {application.type === "Leave" && application.toDate
-    ? `${new Date(application.date).toLocaleDateString("en-GB")} to ${new Date(application.toDate).toLocaleDateString("en-GB")}`
-    : new Date(application.date).toLocaleDateString("en-GB")}
+                  <p id="date">
+  {application.type === "Leave"
+    ? application.toDate
+      ? `${format(application.date)} to ${format(application.toDate)}`
+      : `${format(application.date)} (${application.fromPeriod === 0.5 ? "half day" : "full day"})`
+    : `${format(application.date)} - ${application.time}`}
 </p>
+
 
                     {application.fileUrl && (
                       <a

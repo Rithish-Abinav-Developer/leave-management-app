@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     hasSeen: Number,
     division:String,
     profileImage: {
-    type: String, // URL to image
+    type: String, 
     default: "",
   },
   },

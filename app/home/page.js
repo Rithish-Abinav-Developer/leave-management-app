@@ -98,7 +98,7 @@ const { data: announcement, isLoading: announcementLoading } = useQuery({
 const { data: Application, isLoading: applicationLoading } = useQuery({
   queryKey: ["application", user?.name],
   queryFn: async () => {
-    const res = await axios.get(`/api/applications/${user.name}`);
+    const res = await axios.get(`/api/applications/${user.name}?role=${user?.role || ""}`);
     return res.data.userApplications;
   },
   enabled: !!user, 

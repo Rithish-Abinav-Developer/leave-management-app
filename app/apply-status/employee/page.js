@@ -54,13 +54,18 @@ export default function EmployeeStatusPage() {
               <li key={a._id}>
                 <div className="detail">
                   <p id="leave_type">{a.type === "Leave" ? a.leaveType : `Permission for ${a.hours==="0.5"?"half an":a.hours} hr`}</p>
-                  <p id="date">
-  {a.type === "Leave"
-    ? `${new Date(a.date).toLocaleDateString("en-GB")} to ${new Date(
-        a.toDate
-      ).toLocaleDateString("en-GB")}`
-    : `${new Date(a.date).toLocaleDateString("en-GB")} - ${a.time}`}
+                <p id="date">
+  {a.type === "Leave" ? (
+    a.toDate
+      ? `${new Date(a.date).toLocaleDateString("en-GB")} to ${new Date(
+          a.toDate
+        ).toLocaleDateString("en-GB")}`
+      : `${new Date(a.date).toLocaleDateString("en-GB")}`
+  ) : (
+    `${new Date(a.date).toLocaleDateString("en-GB")} - ${a.time}`
+  )}
 </p>
+
                   <p id="reason">{a.reason}</p>
                   {a.fileUrl && (
                     <a id="medical_certificate" href={a.fileUrl} target="_blank" rel="noopener noreferrer">View Medical Certificate</a>
@@ -80,11 +85,18 @@ export default function EmployeeStatusPage() {
                 <li key={a._id}>
                   <div className="detail">
                     <p id="leave_type">{a.type === "Leave" ? a.leaveType : "Permission"}</p>
-                    <p id="date">
-                      {a.type === "Leave"
-                        ? `${new Date(a.date).toLocaleDateString("en-GB")} to ${new Date(a.toDate).toLocaleDateString("en-GB")}`
-                        : new Date(a.date).toLocaleDateString("en-GB")}
-                    </p>
+                   <p id="date">
+  {a.type === "Leave" ? (
+    a.toDate
+      ? `${new Date(a.date).toLocaleDateString("en-GB")} to ${new Date(
+          a.toDate
+        ).toLocaleDateString("en-GB")}`
+      : `${new Date(a.date).toLocaleDateString("en-GB")}`
+  ) : (
+    `${new Date(a.date).toLocaleDateString("en-GB")} - ${a.time}`
+  )}
+</p>
+
                     <p id="reason">{a.reason}</p>
                      {a.fileUrl && (
                     <a id="medical_certificate" href={a.fileUrl} target="_blank" rel="noopener noreferrer">View Medical Certificate</a>

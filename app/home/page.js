@@ -104,18 +104,22 @@ const { data: Application, isLoading: applicationLoading } = useQuery({
   enabled: !!user, 
 });
 
-// ---- CASUAL LEAVE (all time) ----
+
 const casualLeave = Application?.filter(
   item => item.leaveType === "Casual Leave" && item.status === "Approved"
 ) || [];
+
+console.log("CASUAL FILTERED:", casualLeave);
+
 
 const totalCasualLeaveDays = casualLeave.reduce(
   (sum, item) => sum + (item.period || 0),
   0
 );
+console.log("CASUAL TOTAL DAYS:", totalCasualLeaveDays);
 
 
-// ---- SICK LEAVE (all time) ----
+
 const sickLeave = Application?.filter(
   item => item.leaveType === "Sick Leave" && item.status === "Approved"
 ) || [];
@@ -126,7 +130,7 @@ const totalSickLeaveDays = sickLeave.reduce(
 );
 
 
-// ---- PERMISSION (ONLY approved + current month) ----
+
 const currentMonth = new Date().getMonth();
 const currentYear = new Date().getFullYear();
 

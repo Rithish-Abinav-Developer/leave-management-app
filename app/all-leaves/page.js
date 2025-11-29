@@ -161,7 +161,7 @@ export default function Page() {
   {application.type === "Leave"
     ? application.toDate
       ? `${format(application.date)} to ${format(application.toDate)}`
-      : `${format(application.date)} (${application.fromPeriod === 0.5 ? "half day" : ""})`
+      : `${format(application.date)} ${application.fromPeriod === 0.5 ? "half day" : ""}`
      : `${format(application.date)} - ${formatTime24to12(application.time)}`}
 </p>
 

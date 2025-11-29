@@ -72,7 +72,7 @@ const { data: applications = [], isLoading, refetch } = useQuery({
     if (!d) return "";
     return new Date(d).toLocaleDateString("en-GB");
   }
-  
+
       function formatTime24to12(time24) {
   if (!time24) return "";
   const [hourStr, minuteStr] = time24.split(":");
@@ -166,7 +166,7 @@ const { data: applications = [], isLoading, refetch } = useQuery({
   {application.type === "Leave"
     ? application.toDate
       ? `${format(application.date)} to ${format(application.toDate)}`
-      : `${format(application.date)} (${application.fromPeriod === 0.5 ? "half day" : ""})`
+      : `${format(application.date)} ${application.fromPeriod === 0.5 ? "half day" : ""}`
     : `${format(application.date)} - ${formatTime24to12(application.time)}`}
 </p>
 

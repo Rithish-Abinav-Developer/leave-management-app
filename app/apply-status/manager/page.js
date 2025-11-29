@@ -68,6 +68,23 @@ const { data: applications = [], isLoading, refetch } = useQuery({
     }
   };
 
+
+  
+    function format(d) {
+    if (!d) return "";
+    return new Date(d).toLocaleDateString("en-GB");
+  }
+  
+      function formatTime24to12(time24) {
+  if (!time24) return "";
+  const [hourStr, minuteStr] = time24.split(":");
+  let hour = parseInt(hourStr, 10);
+  const minute = minuteStr;
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+  return `${hour}:${minute} ${ampm}`;
+}
+
   return (
     <div className="apply_page apply_status_page">
 {(isLoading || isLoadingNotifications || loading) && <Loader />}
@@ -88,10 +105,12 @@ const { data: applications = [], isLoading, refetch } = useQuery({
                         : `Permission for ${application.hours==="0.5"?"half an":application.hours} hr`}
 
                     </p>
-           <p id="date">
-  {application.type === "Leave" && application.toDate
-    ? `${new Date(application.date).toLocaleDateString("en-GB")} to ${new Date(application.toDate).toLocaleDateString("en-GB")}`
-    : new Date(application.date).toLocaleDateString("en-GB")}
+          <p id="date">
+  {application.type === "Leave"
+    ? application.toDate
+      ? `${format(application.date)} to ${format(application.toDate)}`
+    : `${format(application.date)} ${application.fromPeriod === 0.5 ? "half day" : ""}`
+     : `${format(application.date)} - ${formatTime24to12(application.time)}`}
 </p>
 
 

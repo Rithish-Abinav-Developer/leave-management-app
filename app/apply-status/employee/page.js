@@ -101,7 +101,7 @@ export default function EmployeeStatusPage() {
   {a.type === "Leave"
     ? a.toDate
       ? `${format(a.date)} to ${format(a.toDate)}`
-    : `${format(a.date)} (${a.fromPeriod === 0.5 ? "half day" : ""})`
+    : `${format(a.date)} ${a.fromPeriod === 0.5 ? "half day" : ""}`
      : `${format(a.date)} - ${formatTime24to12(a.time)}`}
 </p>
 

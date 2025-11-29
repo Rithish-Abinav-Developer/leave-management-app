@@ -71,40 +71,99 @@ useEffect(() => {
   // });
 
 
-  const exportToExcel = () => {
-    if (!allApplications || allApplications.length === 0) {
-      alert("No data to export");
-      return;
-    }
+  // ============================
+// 🟦 LEAVE PERIOD CALCULATOR
+// ============================
+function calculatePeriod(a) {
+  if (a.type !== "Leave") return 0;
 
-   
-const exportData = allApplications.map((a) => {
-  const startDate = new Date(a.date).toLocaleDateString("en-GB");
+  const start = new Date(a.date);
+  const end = a.toDate ? new Date(a.toDate) : null;
+
+  // Single-day leave
+  if (!end) {
+    return a.fromPeriod || 1; // default full day
+  }
+
+  // Multi-day leave
+  const totalDays =
+    (end - start) / (1000 * 60 * 60 * 24) + 1; // inclusive days
+
+  if (totalDays <= 1) {
+    return a.fromPeriod || 1;
+  }
+
+  const middleDays = Math.max(totalDays - 2, 0); // full days between
+
+  return (a.fromPeriod || 1) + middleDays + (a.toPeriod || 1);
+}
 
 
-  let DateField = startDate;
+// Attach period to each item
+const applicationsWithPeriod = allApplications.map(a => ({
+  ...a,
+  period: calculatePeriod(a)
+}));
+
+
+// ============================
+// 🟦 TOTALS
+// ============================
+const casualLeaveDays = applicationsWithPeriod
+  .filter(a => a.leaveType === "Casual Leave" && a.status === "Approved")
+  .reduce((sum, a) => sum + a.period, 0);
+
+const sickLeaveDays = applicationsWithPeriod
+  .filter(a => a.leaveType === "Sick Leave" && a.status === "Approved")
+  .reduce((sum, a) => sum + a.period, 0);
+
+const totalPermissionHours = applicationsWithPeriod
+  .filter(a => a.type === "Permission" && a.status === "Approved")
+  .reduce((sum, a) => sum + Number(a.hours || 0), 0);
+
+
+// ============================
+// 🟦 DATE FORMATTER
+// ============================
+function formatDateRow(a) {
+  const start = new Date(a.date).toLocaleDateString("en-GB");
 
   if (a.type === "Leave") {
     if (a.toDate) {
-  
-      const endDate = new Date(a.toDate).toLocaleDateString("en-GB");
-      DateField = `${startDate} - ${endDate}`;
-    } else {
-    
-      DateField = startDate;
+      const end = new Date(a.toDate).toLocaleDateString("en-GB");
+      return `${start} - ${end}`;
     }
+    return start;
   }
 
-  return {
-    Name: a.name,
-    Type: a.type === "Leave" ? a.leaveType : "Permission",
-    Date: DateField,
-    Reason: a.reason || "-",
-    Status: a.status,
-    ...(a.leaveType === "Sick Leave" && { File: a.fileUrl || "-" }),
-    ...(a.type === "Permission" && { Hours: `${a.hours} hrs` }),
-  };
-});
+  return `${start} - ${a.time}`;
+}
+
+
+// ============================
+// 🟦 EXPORT DATA
+// ============================
+const exportData = applicationsWithPeriod.map(a => ({
+  Name: a.name,
+
+  "Total Casual Leave Days": casualLeaveDays,
+  "Total Sick Leave Days": sickLeaveDays,
+  "Total Permission Hours": totalPermissionHours,
+
+  "Leave Period": a.period || "-",   // ⭐ New Column
+
+  Type: a.type === "Leave" ? a.leaveType : "Permission",
+
+  Date: formatDateRow(a),
+
+  Reason: a.reason || "-",
+  Status: a.status,
+
+  ...(a.leaveType === "Sick Leave" && { File: a.fileUrl || "-" }),
+  ...(a.type === "Permission" && { Hours: `${a.hours} hrs` }),
+}));
+
+
 
 
 

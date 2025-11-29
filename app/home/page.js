@@ -104,19 +104,44 @@ const { data: Application, isLoading: applicationLoading } = useQuery({
   enabled: !!user, 
 });
 
-const casualLeave = Application?.filter(item => item.leaveType === "Casual Leave" && item.status === "Approved") || [];
-const totalCasualLeaveDays = casualLeave.reduce((sum, item) => sum + (item.period || 0), 0);
+// ---- CASUAL LEAVE (all time) ----
+const casualLeave = Application?.filter(
+  item => item.leaveType === "Casual Leave" && item.status === "Approved"
+) || [];
 
-const sickLeave = Application?.filter(item => item.leaveType === "Sick Leave" && item.status === "Approved") || [];
-// const permission = Application?.filter(item => item.type === "Permission" && item.status === "Approved" ) || 0;
+const totalCasualLeaveDays = casualLeave.reduce(
+  (sum, item) => sum + (item.period || 0),
+  0
+);
+
+
+// ---- SICK LEAVE (all time) ----
+const sickLeave = Application?.filter(
+  item => item.leaveType === "Sick Leave" && item.status === "Approved"
+) || [];
+
+const totalSickLeaveDays = sickLeave.reduce(
+  (sum, item) => sum + (item.period || 0),
+  0
+);
+
+
+// ---- PERMISSION (ONLY approved + current month) ----
+const currentMonth = new Date().getMonth();
+const currentYear = new Date().getFullYear();
+
 const permission = Application?.filter((item) => {
-  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
-  const itemMonth = new Date(item.date).toLocaleString('default', { month: 'long' });
+  if (item.type !== "Permission") return false;
+  if (item.status !== "Approved") return false;
 
-  console.log(itemMonth);
+  const itemDate = new Date(item.date);
+  return (
+    itemDate.getMonth() === currentMonth &&
+    itemDate.getFullYear() === currentYear
+  );
+}) || [];
 
-  return itemMonth === currentMonth && item.status === "Approved" || 0 ; 
-});
+const totalPermissions = permission.length;
 
 
 
@@ -186,7 +211,7 @@ const { data: RecentLeave, isLoading: recentLeaveLoading } = useQuery({
         <div>
 <Image src={casualLeaveIcon} alt="casual-leave-icon" width={35} height={35} />
 <span>
-    <p className={`${casualLeave?.length> 12 ? "warning" : ""}`}>{totalCasualLeaveDays || 0}</p>/<p>12</p>
+    <p className={`${totalCasualLeaveDays > 12 ? "warning" : ""}`}>{totalCasualLeaveDays || 0}</p>/<p>12</p>
 </span>
         </div>
         <p>Casual Leave</p>
@@ -196,7 +221,7 @@ const { data: RecentLeave, isLoading: recentLeaveLoading } = useQuery({
         <div>
 <Image src={sickLeaveIcon} alt="sick-leave-icon" width={35} height={35} />
 <span>
-    <p className={`${sickLeave?.length > 12 ? "warning" : ""}`}>{sickLeave?.length || 0}</p>/<p>12</p>
+    <p className={`${totalSickLeaveDays > 12 ? "warning" : ""}`}>{totalSickLeaveDays || 0}</p>/<p>12</p>
 </span>
         </div>
         <p>Sick Leave</p>
@@ -206,7 +231,7 @@ const { data: RecentLeave, isLoading: recentLeaveLoading } = useQuery({
         <div>
 <Image src={PermissionIcon} alt="permission-icon" width={35} height={35} />
 <span>
-    <p className={`${permission?.length > 2 ? "warning" : ""}`}>{permission?.length || 0}</p>/<p>02</p>
+    <p className={`${totalPermissions > 2 ? "warning" : ""}`}>{totalPermissions || 0}</p>/<p>02</p>
 </span>
         </div>
         <p>Permissions</p>

@@ -173,6 +173,17 @@ const { data: RecentLeave, isLoading: recentLeaveLoading } = useQuery({
 });
 
 
+function formatTime24to12(time24) {
+  if (!time24) return "";
+  const [hourStr, minuteStr] = time24.split(":");
+  let hour = parseInt(hourStr, 10);
+  const minute = minuteStr;
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12; 
+  return `${hour}:${minute} ${ampm}`;
+}
+
+
 
   // if (userLoading) return <p>Loading...</p>;
 
@@ -359,22 +370,24 @@ const { data: RecentLeave, isLoading: recentLeaveLoading } = useQuery({
       />
       <div>
         <h5>{user?.role !== "employee" && item.name + " -"} {item.type==="Leave"?item.leaveType:`Permission for ${item.hours==="0.5"?"half an":item.hours} hr`}</h5>
-      {item.type === "Leave" ? (
+     {item.type === "Leave" ? (
   item.toDate ? (
     <p className="date">
       {new Date(item.date).toLocaleDateString("en-GB")} to{" "}
-      {new Date(item.toDate).toLocaleDateString("en-GB")}
+      {new Date(item.toDate).toLocaleDateString("en-GB")} ({item.period} day{item.period > 1 ? "s" : ""})
     </p>
   ) : (
     <p className="date">
       {new Date(item.date).toLocaleDateString("en-GB")}
+      {item.fromPeriod === 0.5 ? " (half day)" : ""}
     </p>
   )
 ) : (
   <p className="date">
-    {new Date(item.date).toLocaleDateString("en-GB")} - {item.time}
+    {new Date(item.date).toLocaleDateString("en-GB")} - {formatTime24to12(item.time)}
   </p>
 )}
+
 
         <p className="reason">{item.reason}</p>
       </div>

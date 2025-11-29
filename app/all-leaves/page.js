@@ -51,7 +51,7 @@ export default function Page() {
     enabled: !!adminName && !!role && isClient,
   });
 
-  // ------------------------------
+
   function format(d) {
     if (!d) return "";
     return new Date(d).toLocaleDateString("en-GB");
@@ -106,7 +106,17 @@ export default function Page() {
     saveAs(blob, "applications.xlsx");
   }
 
-  // ------------------------------
+      function formatTime24to12(time24) {
+  if (!time24) return "";
+  const [hourStr, minuteStr] = time24.split(":");
+  let hour = parseInt(hourStr, 10);
+  const minute = minuteStr;
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12; 
+  return `${hour}:${minute} ${ampm}`;
+}
+
+
   return (
     <div className="all_leaves">
       {isLoading && <Loader />}
@@ -152,7 +162,7 @@ export default function Page() {
     ? application.toDate
       ? `${format(application.date)} to ${format(application.toDate)}`
       : `${format(application.date)} (${application.fromPeriod === 0.5 ? "half day" : ""})`
-    : `${format(application.date)} - ${application.time}`}
+     : `${format(application.date)} - ${formatTime24to12(application.time)}`}
 </p>
 
 

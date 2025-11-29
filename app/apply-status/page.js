@@ -98,6 +98,16 @@ export default function Page() {
       </div>
     );
 
+    function formatTime24to12(time24) {
+  if (!time24) return "";
+  const [hourStr, minuteStr] = time24.split(":");
+  let hour = parseInt(hourStr, 10);
+  const minute = minuteStr;
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12; // convert 0 to 12
+  return `${hour}:${minute} ${ampm}`;
+}
+
   
   return (
     <div className="apply_page apply_status_page">
@@ -152,7 +162,7 @@ export default function Page() {
     ? application.toDate
       ? `${format(application.date)} to ${format(application.toDate)}`
     : `${format(application.date)} (${application.fromPeriod === 0.5 ? "half day" : ""})`
-    : `${format(application.date)} - ${application.time}`}
+     : `${format(application.date)} - ${formatTime24to12(application.time)}`}
 </p>
 
  {application.fileUrl && (

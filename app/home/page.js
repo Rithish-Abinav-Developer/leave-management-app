@@ -109,14 +109,14 @@ const casualLeave = Application?.filter(
   item => item.leaveType === "Casual Leave" && item.status === "Approved"
 ) || [];
 
-console.log("CASUAL FILTERED:", casualLeave);
+
 
 
 const totalCasualLeaveDays = casualLeave.reduce(
   (sum, item) => sum + (item.period || 0),
   0
 );
-console.log("CASUAL TOTAL DAYS:", totalCasualLeaveDays);
+
 
 
 
@@ -359,16 +359,23 @@ const { data: RecentLeave, isLoading: recentLeaveLoading } = useQuery({
       />
       <div>
         <h5>{user?.role !== "employee" && item.name + " -"} {item.type==="Leave"?item.leaveType:`Permission for ${item.hours==="0.5"?"half an":item.hours} hr`}</h5>
-        {item.toDate ? (
-          <p className="date">
-            {`${new Date(item.date).toLocaleDateString("en-GB")}`} to{" "}
-            {`${new Date(item.toDate).toLocaleDateString("en-GB")}`}
-          </p>
-        ) : (
-          <p className="date">
-            {`${new Date(item.date).toLocaleDateString("en-GB")} - ${item.time}`}
-          </p>
-        )}
+      {item.type === "Leave" ? (
+  item.toDate ? (
+    <p className="date">
+      {new Date(item.date).toLocaleDateString("en-GB")} to{" "}
+      {new Date(item.toDate).toLocaleDateString("en-GB")}
+    </p>
+  ) : (
+    <p className="date">
+      {new Date(item.date).toLocaleDateString("en-GB")}
+    </p>
+  )
+) : (
+  <p className="date">
+    {new Date(item.date).toLocaleDateString("en-GB")} - {item.time}
+  </p>
+)}
+
         <p className="reason">{item.reason}</p>
       </div>
     </div>

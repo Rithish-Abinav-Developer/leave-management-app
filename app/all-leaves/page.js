@@ -37,7 +37,7 @@ export default function Page() {
     updateStatus();
   }, [adminName, isClient]);
 
-  const { data: allApplications = [], isLoading, refetch } = useQuery({
+  const { data: allApplications = [], isLoading } = useQuery({
     queryKey: ["adminApplications", adminName],
     queryFn: async () => {
       let res;
@@ -52,26 +52,19 @@ export default function Page() {
   });
 
   // ------------------------------
-  // Helper: safe date formatter
   function format(d) {
     if (!d) return "";
     return new Date(d).toLocaleDateString("en-GB");
   }
 
-  // ------------------------------
-  // Leave period calculator
   function calculatePeriod(a) {
     if (a.type !== "Leave") return 0;
-
     const start = new Date(a.date);
     const end = a.toDate ? new Date(a.toDate) : null;
 
-    // Single-day leave
-    if (!end) {
-      return a.fromPeriod || 1;
-    }
+    if (!end) return a.fromPeriod || 1;
 
-    const totalDays = (end - start) / (1000 * 60 * 60 * 24) + 1; // inclusive
+    const totalDays = (end - start) / (1000 * 60 * 60 * 24) + 1;
     if (totalDays <= 1) return a.fromPeriod || 1;
 
     const middleDays = Math.max(totalDays - 2, 0);
@@ -83,22 +76,6 @@ export default function Page() {
     period: calculatePeriod(a),
   }));
 
-  // ------------------------------
-  // Totals
-  const casualLeaveDays = applicationsWithPeriod
-    .filter(a => a.leaveType === "Casual Leave" && a.status === "Approved")
-    .reduce((sum, a) => sum + a.period, 0);
-
-  const sickLeaveDays = applicationsWithPeriod
-    .filter(a => a.leaveType === "Sick Leave" && a.status === "Approved")
-    .reduce((sum, a) => sum + a.period, 0);
-
-  const totalPermissionHours = applicationsWithPeriod
-    .filter(a => a.type === "Permission" && a.status === "Approved")
-    .reduce((sum, a) => sum + Number(a.hours || 0), 0);
-
-  // ------------------------------
-  // Date formatter per row
   function formatDateRow(a) {
     const start = format(a.date);
     if (a.type === "Leave") {
@@ -108,14 +85,9 @@ export default function Page() {
     return `${start} - ${a.time}`;
   }
 
-  // ------------------------------
-  // Export to Excel
   function exportToExcel() {
     const exportData = applicationsWithPeriod.map(a => ({
       Name: a.name,
-      "Total Casual Leave Days": casualLeaveDays,
-      "Total Sick Leave Days": sickLeaveDays,
-      "Total Permission Hours": totalPermissionHours,
       "Leave Period": a.period || "-",
       Type: a.type === "Leave" ? a.leaveType : "Permission",
       Date: formatDateRow(a),
@@ -154,7 +126,7 @@ export default function Page() {
             <p className="txts">No applications found.</p>
           ) : (
             <ul className="all_leave_applications">
-              {allApplications.map(application => (
+              {applicationsWithPeriod.map(application => (
                 <li
                   key={application._id}
                   className={`leave ${

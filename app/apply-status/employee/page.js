@@ -40,6 +40,22 @@ export default function EmployeeStatusPage() {
   const recent = applications.filter(a => a.status === "Pending");
   const past = applications.filter(a => ["Approved", "Rejected"].includes(a.status));
 
+    function format(d) {
+    if (!d) return "";
+    return new Date(d).toLocaleDateString("en-GB");
+  }
+
+      function formatTime24to12(time24) {
+  if (!time24) return "";
+  const [hourStr, minuteStr] = time24.split(":");
+  let hour = parseInt(hourStr, 10);
+  const minute = minuteStr;
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12; 
+  return `${hour}:${minute} ${ampm}`;
+}
+
+
   // if (isLoading) return <p>Loading...</p>;
 
   return (
@@ -54,16 +70,12 @@ export default function EmployeeStatusPage() {
               <li key={a._id}>
                 <div className="detail">
                   <p id="leave_type">{a.type === "Leave" ? a.leaveType : `Permission for ${a.hours==="0.5"?"half an":a.hours} hr`}</p>
-                <p id="date">
-  {a.type === "Leave" ? (
-    a.toDate
-      ? `${new Date(a.date).toLocaleDateString("en-GB")} to ${new Date(
-          a.toDate
-        ).toLocaleDateString("en-GB")}`
-      : `${new Date(a.date).toLocaleDateString("en-GB")}`
-  ) : (
-    `${new Date(a.date).toLocaleDateString("en-GB")} - ${a.time}`
-  )}
+         <p id="date">
+  {a.type === "Leave"
+    ? a.toDate
+      ? `${format(a.date)} to ${format(a.toDate)}`
+    : `${format(a.date)} (${a.fromPeriod === 0.5 ? "half day" : ""})`
+     : `${format(a.date)} - ${formatTime24to12(a.time)}`}
 </p>
 
                   <p id="reason">{a.reason}</p>
@@ -85,16 +97,12 @@ export default function EmployeeStatusPage() {
                 <li key={a._id}>
                   <div className="detail">
                     <p id="leave_type">{a.type === "Leave" ? a.leaveType : "Permission"}</p>
-                   <p id="date">
-  {a.type === "Leave" ? (
-    a.toDate
-      ? `${new Date(a.date).toLocaleDateString("en-GB")} to ${new Date(
-          a.toDate
-        ).toLocaleDateString("en-GB")}`
-      : `${new Date(a.date).toLocaleDateString("en-GB")}`
-  ) : (
-    `${new Date(a.date).toLocaleDateString("en-GB")} - ${a.time}`
-  )}
+                 <p id="date">
+  {a.type === "Leave"
+    ? a.toDate
+      ? `${format(a.date)} to ${format(a.toDate)}`
+    : `${format(a.date)} (${a.fromPeriod === 0.5 ? "half day" : ""})`
+     : `${format(a.date)} - ${formatTime24to12(a.time)}`}
 </p>
 
                     <p id="reason">{a.reason}</p>

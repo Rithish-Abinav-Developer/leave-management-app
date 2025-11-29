@@ -98,13 +98,18 @@ export default function Page() {
       </div>
     );
 
+      function format(d) {
+    if (!d) return "";
+    return new Date(d).toLocaleDateString("en-GB");
+  }
+  
     function formatTime24to12(time24) {
   if (!time24) return "";
   const [hourStr, minuteStr] = time24.split(":");
   let hour = parseInt(hourStr, 10);
   const minute = minuteStr;
   const ampm = hour >= 12 ? "PM" : "AM";
-  hour = hour % 12 || 12; // convert 0 to 12
+  hour = hour % 12 || 12; 
   return `${hour}:${minute} ${ampm}`;
 }
 

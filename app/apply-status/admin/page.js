@@ -68,6 +68,11 @@ const { data: applications = [], isLoading, refetch } = useQuery({
     }
   };
 
+    function format(d) {
+    if (!d) return "";
+    return new Date(d).toLocaleDateString("en-GB");
+  }
+  
       function formatTime24to12(time24) {
   if (!time24) return "";
   const [hourStr, minuteStr] = time24.split(":");

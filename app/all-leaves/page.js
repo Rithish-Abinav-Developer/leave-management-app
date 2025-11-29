@@ -11,11 +11,10 @@ import { saveAs } from "file-saver";
 import Loader from "../components/Loader";
 
 export default function Page() {
-
- const [adminName, setAdminName] = useState("");
- const [role,setRole] = useState("");
+  const [adminName, setAdminName] = useState("");
+  const [role, setRole] = useState("");
   const [isClient, setIsClient] = useState(false); 
-  
+
   useEffect(() => {
     const user = localStorage.getItem("user");
     if (user) {
@@ -26,167 +25,119 @@ export default function Page() {
     setIsClient(true); 
   }, []);
 
-useEffect(() => {
-  if (!adminName) return;
-  const updateStatus = async () => {
-    try {
-      await axios.put(`/api/login/update-status/${adminName}`, { hasSeen: 0 });
-    } catch (err) {
-      console.error("Failed to update status:", err);
-    }
-  };
-  updateStatus();
-}, [adminName, isClient]);
+  useEffect(() => {
+    if (!adminName) return;
+    const updateStatus = async () => {
+      try {
+        await axios.put(`/api/login/update-status/${adminName}`, { hasSeen: 0 });
+      } catch (err) {
+        console.error("Failed to update status:", err);
+      }
+    };
+    updateStatus();
+  }, [adminName, isClient]);
 
+  const { data: allApplications = [], isLoading, refetch } = useQuery({
+    queryKey: ["adminApplications", adminName],
+    queryFn: async () => {
+      let res;
+      if (role === "Manager") {
+        res = await axios.get(`/api/applications?admin=${adminName}`);
+      } else {
+        res = await axios.get(`/api/applications`);
+      }
+      return res.data.userApplications || [];
+    },
+    enabled: !!adminName && !!role && isClient,
+  });
 
-  
-  
-   
- const { data: allApplications = [], isLoading, refetch } = useQuery({
-  queryKey: ["adminApplications", adminName],
-  queryFn: async () => {
-    
-    let res;
-
-    if (role === "Manager") {
-      res = await axios.get(`/api/applications?admin=${adminName}`);
-    } else {
-      res = await axios.get(`/api/applications`);
-    }
-
-    return res.data.userApplications || [];
-  },
-  enabled: !!adminName && !!role && isClient,
-});
-
-
-
-  // const { data: allApplications, isLoading } = useQuery({
-  //   queryKey: ["allApplications"],
-  //   queryFn: async () => {
-  //     const res = await axios.get("/api/applications");
-  //     console.log(res.data.userApplications);
-  //     return res.data.userApplications;
-  //   },
-  // });
-
-
-  // ============================
-// 🟦 LEAVE PERIOD CALCULATOR
-// ============================
-function calculatePeriod(a) {
-  if (a.type !== "Leave") return 0;
-
-  const start = new Date(a.date);
-  const end = a.toDate ? new Date(a.toDate) : null;
-
-  // Single-day leave
-  if (!end) {
-    return a.fromPeriod || 1; // default full day
+  // ------------------------------
+  // Helper: safe date formatter
+  function format(d) {
+    if (!d) return "";
+    return new Date(d).toLocaleDateString("en-GB");
   }
 
-  // Multi-day leave
-  const totalDays =
-    (end - start) / (1000 * 60 * 60 * 24) + 1; // inclusive days
+  // ------------------------------
+  // Leave period calculator
+  function calculatePeriod(a) {
+    if (a.type !== "Leave") return 0;
 
-  if (totalDays <= 1) {
-    return a.fromPeriod || 1;
-  }
+    const start = new Date(a.date);
+    const end = a.toDate ? new Date(a.toDate) : null;
 
-  const middleDays = Math.max(totalDays - 2, 0); // full days between
-
-  return (a.fromPeriod || 1) + middleDays + (a.toPeriod || 1);
-}
-
-
-// Attach period to each item
-const applicationsWithPeriod = allApplications.map(a => ({
-  ...a,
-  period: calculatePeriod(a)
-}));
-
-
-// ============================
-// 🟦 TOTALS
-// ============================
-const casualLeaveDays = applicationsWithPeriod
-  .filter(a => a.leaveType === "Casual Leave" && a.status === "Approved")
-  .reduce((sum, a) => sum + a.period, 0);
-
-const sickLeaveDays = applicationsWithPeriod
-  .filter(a => a.leaveType === "Sick Leave" && a.status === "Approved")
-  .reduce((sum, a) => sum + a.period, 0);
-
-const totalPermissionHours = applicationsWithPeriod
-  .filter(a => a.type === "Permission" && a.status === "Approved")
-  .reduce((sum, a) => sum + Number(a.hours || 0), 0);
-
-
-// ============================
-// 🟦 DATE FORMATTER
-// ============================
-function formatDateRow(a) {
-  const start = new Date(a.date).toLocaleDateString("en-GB");
-
-  if (a.type === "Leave") {
-    if (a.toDate) {
-      const end = new Date(a.toDate).toLocaleDateString("en-GB");
-      return `${start} - ${end}`;
+    // Single-day leave
+    if (!end) {
+      return a.fromPeriod || 1;
     }
-    return start;
+
+    const totalDays = (end - start) / (1000 * 60 * 60 * 24) + 1; // inclusive
+    if (totalDays <= 1) return a.fromPeriod || 1;
+
+    const middleDays = Math.max(totalDays - 2, 0);
+    return (a.fromPeriod || 1) + middleDays + (a.toPeriod || 1);
   }
 
-  return `${start} - ${a.time}`;
-}
+  const applicationsWithPeriod = allApplications.map(a => ({
+    ...a,
+    period: calculatePeriod(a),
+  }));
 
+  // ------------------------------
+  // Totals
+  const casualLeaveDays = applicationsWithPeriod
+    .filter(a => a.leaveType === "Casual Leave" && a.status === "Approved")
+    .reduce((sum, a) => sum + a.period, 0);
 
-// ============================
-// 🟦 EXPORT DATA
-// ============================
-const exportData = applicationsWithPeriod.map(a => ({
-  Name: a.name,
+  const sickLeaveDays = applicationsWithPeriod
+    .filter(a => a.leaveType === "Sick Leave" && a.status === "Approved")
+    .reduce((sum, a) => sum + a.period, 0);
 
-  "Total Casual Leave Days": casualLeaveDays,
-  "Total Sick Leave Days": sickLeaveDays,
-  "Total Permission Hours": totalPermissionHours,
+  const totalPermissionHours = applicationsWithPeriod
+    .filter(a => a.type === "Permission" && a.status === "Approved")
+    .reduce((sum, a) => sum + Number(a.hours || 0), 0);
 
-  "Leave Period": a.period || "-",   // ⭐ New Column
+  // ------------------------------
+  // Date formatter per row
+  function formatDateRow(a) {
+    const start = format(a.date);
+    if (a.type === "Leave") {
+      if (a.toDate) return `${start} - ${format(a.toDate)}`;
+      return start;
+    }
+    return `${start} - ${a.time}`;
+  }
 
-  Type: a.type === "Leave" ? a.leaveType : "Permission",
+  // ------------------------------
+  // Export to Excel
+  function exportToExcel() {
+    const exportData = applicationsWithPeriod.map(a => ({
+      Name: a.name,
+      "Total Casual Leave Days": casualLeaveDays,
+      "Total Sick Leave Days": sickLeaveDays,
+      "Total Permission Hours": totalPermissionHours,
+      "Leave Period": a.period || "-",
+      Type: a.type === "Leave" ? a.leaveType : "Permission",
+      Date: formatDateRow(a),
+      Reason: a.reason || "-",
+      Status: a.status || "-",
+      ...(a.leaveType === "Sick Leave" && { File: a.fileUrl || "-" }),
+      ...(a.type === "Permission" && { Hours: `${a.hours} hrs` }),
+    }));
 
-  Date: formatDateRow(a),
-
-  Reason: a.reason || "-",
-  Status: a.status,
-
-  ...(a.leaveType === "Sick Leave" && { File: a.fileUrl || "-" }),
-  ...(a.type === "Permission" && { Hours: `${a.hours} hrs` }),
-}));
-
-
-
-
-
-   
     const worksheet = XLSX.utils.json_to_sheet(exportData);
-
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Leave Applications");
 
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    const blob = new Blob([excelBuffer], {
-      type: "application/octet-stream",
-    });
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(blob, "applications.xlsx");
-  };
+  }
 
+  // ------------------------------
   return (
     <div className="all_leaves">
-      {isLoading && <Loader/>}
+      {isLoading && <Loader />}
       <Header pageTitle="Applications" currentNotificationCount={0} />
 
       <div className="container">
@@ -195,45 +146,44 @@ const exportData = applicationsWithPeriod.map(a => ({
             <h3>All Leaves</h3>
             <button onClick={exportToExcel} className="export-btn">
               Export
-              <Image
-                src={rightArrow}
-                alt="right-arrow"
-                width={16}
-                height={16}
-              />
+              <Image src={rightArrow} alt="right-arrow" width={16} height={16} />
             </button>
           </div>
 
-          {!allApplications || allApplications.length === 0?
-          ( <p className="txts">No applications found.</p>
-          ):
-(
-          <ul className="all_leave_applications">
-            {allApplications &&
-              allApplications.map((application) => (
-                <li key={application._id} className={`leave ${
-        application.status === "Approved"
-          ? "approved"
-          : application.status === "Rejected"
-          ? "rejected"
-          : "pending"
-      }`}>
+          {!allApplications || allApplications.length === 0 ? (
+            <p className="txts">No applications found.</p>
+          ) : (
+            <ul className="all_leave_applications">
+              {allApplications.map(application => (
+                <li
+                  key={application._id}
+                  className={`leave ${
+                    application.status === "Approved"
+                      ? "approved"
+                      : application.status === "Rejected"
+                      ? "rejected"
+                      : "pending"
+                  }`}
+                >
                   <div className="detail">
-                     <p id="leave_type">
+                    <p id="leave_type">
                       {application.name} -{" "}
                       {application.type === "Leave"
                         ? application.leaveType
-                        : `Permission for ${application.hours==="0.5"?"half an":application.hours} hr`}
-
+                        : `Permission for ${
+                            application.hours === "0.5" ? "half an" : application.hours
+                          } hr`}
                     </p>
-                         <p id="date">
-  {application.type === "Leave" && application.toDate
-    ? `${new Date(application.date).toLocaleDateString("en-GB")} to ${new Date(application.toDate).toLocaleDateString("en-GB")}`
-    : new Date(application.date).toLocaleDateString("en-GB")}
-</p>
+
+                    <p id="date">
+                      {application.type === "Leave" && application.toDate
+                        ? `${format(application.date)} to ${format(application.toDate)}`
+                        : format(application.date)}
+                    </p>
 
                     <p id="reason">{application.reason}</p>
-                    {application.fileUrl && (
+
+                    {!!application.fileUrl && (
                       <a
                         id="medical_certificate"
                         href={application.fileUrl}
@@ -244,16 +194,14 @@ const exportData = applicationsWithPeriod.map(a => ({
                       </a>
                     )}
                   </div>
-                  <div
-                    className={`common_btn ${application.status.toLowerCase()}`}
-                  >
-                    {application.status}
+
+                  <div className={`common_btn ${application.status?.toLowerCase() || ""}`}>
+                    {application.status || "-"}
                   </div>
                 </li>
               ))}
-          </ul>
-)
-          }
+            </ul>
+          )}
         </section>
       </div>
 

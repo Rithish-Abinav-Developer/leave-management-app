@@ -78,20 +78,34 @@ useEffect(() => {
     }
 
    
-const exportData = allApplications.map((a) => ({
-  Name: a.name,
-  Type: a.type === "Leave" ? a.leaveType : "Permission",
-  Date:
-    a.type === "Leave"
-      ? `${new Date(a.date).toLocaleDateString()} - ${new Date(
-          a.toDate
-        ).toLocaleDateString()}`
-      : new Date(a.date).toLocaleDateString(),
-  Reason: a.reason || "-",
-  Status: a.status,
-  ...(a.leaveType === "Sick Leave" && { File: a.fileUrl || "-" }) ,
- ...(a.type === "Permission" && { Hours: `${a.hours} hrs` }) ,
-}));
+const exportData = allApplications.map((a) => {
+  const startDate = new Date(a.date).toLocaleDateString("en-GB");
+
+
+  let DateField = startDate;
+
+  if (a.type === "Leave") {
+    if (a.toDate) {
+  
+      const endDate = new Date(a.toDate).toLocaleDateString("en-GB");
+      DateField = `${startDate} - ${endDate}`;
+    } else {
+    
+      DateField = startDate;
+    }
+  }
+
+  return {
+    Name: a.name,
+    Type: a.type === "Leave" ? a.leaveType : "Permission",
+    Date: DateField,
+    Reason: a.reason || "-",
+    Status: a.status,
+    ...(a.leaveType === "Sick Leave" && { File: a.fileUrl || "-" }),
+    ...(a.type === "Permission" && { Hours: `${a.hours} hrs` }),
+  };
+});
+
 
 
    
